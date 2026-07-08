@@ -1,0 +1,29 @@
+{
+  "brand": "AUREL",
+  "root": "C:\\Users\\skyri\\Aurel",
+  "created_files": [
+    "C:\\Users\\skyri\\Aurel\\public\\admin\\index.html",
+    "C:\\Users\\skyri\\Aurel\\functions\\api\\intake.js",
+    "C:\\Users\\skyri\\Aurel\\schema\\schema.sql",
+    "C:\\Users\\skyri\\Aurel\\wrangler.toml"
+  ],
+  "security_findings": [
+    {
+      "file": ".github\\workflows\\ci.yml",
+      "line": 37,
+      "preview": "hidden"
+    },
+    {
+      "file": ".github\\workflows\\pages.yml",
+      "line": 9,
+      "preview": "hidden"
+    }
+  ],
+  "github": {
+    "blocked": "secret scan findings"
+  },
+  "cloudflare": {
+    "deploy_url": null,
+    "admin_url": null
+  }
+}
