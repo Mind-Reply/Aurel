@@ -5,7 +5,7 @@ FROM node:20-alpine AS deps
 RUN apk add --no-cache libc6-compat
 WORKDIR /app
 COPY package.json package-lock.json* ./
-RUN npm ci --prefer-offline
+RUN npm install --frozen-lockfile || npm install
 
 # ── Stage 2: builder ───────────────────────────────────────────
 FROM node:20-alpine AS builder
