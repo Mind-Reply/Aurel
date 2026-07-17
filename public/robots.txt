@@ -1,0 +1,3 @@
+﻿User-agent: *
+Allow: /
+Sitemap: https://aurel.mind-reply.com/sitemap.xml
