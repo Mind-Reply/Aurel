@@ -79,7 +79,7 @@ export default function Inquiry() {
             <Reveal>
               <div className="text-center py-20">
                 <div className="font-serif text-6xl font-light text-aurel-gold mb-8"
-                  style={{ fontFamily: 'Cormorant Garamond, Georgia, serif' }}>✦</div>
+                  style={{ fontFamily: 'Cormorant Garamond, Georgia, serif' }}>âœ¦</div>
                 <h2 className="font-serif text-4xl font-light text-aurel-pearl mb-6"
                   style={{ fontFamily: 'Cormorant Garamond, Georgia, serif' }}>
                   Inquiry received.
@@ -104,7 +104,7 @@ export default function Inquiry() {
                   <div className="space-y-8">
                     {[
                       { step: '01', label: 'We read your inquiry', body: 'Personally reviewed within 24 hours. No automated acknowledgements.' },
-                      { step: '02', label: 'We respond directly', body: 'A single point of contact replies with a direct, considered response — not a template.' },
+                      { step: '02', label: 'We respond directly', body: 'A single point of contact replies with a direct, considered response â€” not a template.' },
                       { step: '03', label: 'We schedule a conversation', body: 'A private call or meeting to understand your environment in detail.' },
                       { step: '04', label: 'Blueprint proposal', body: 'If there is a fit, we propose a Private Connectivity Blueprint as the first formal step.' },
                     ].map(s => (
