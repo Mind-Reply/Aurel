@@ -1,5 +1,12 @@
-﻿# AUREL
+# AUREL Landing Page
 
-AUREL public brand layer: premium identity, inquiry capture, and service request routing.
+Static HTML landing page for `aurel.mind-reply.com`.
 
-Advanced UI, voice chat, builder, n8n scaffold, model router.
+## Deploy
+
+This page is served from Cloudflare Pages. Push to `main` to deploy.
+
+## Links
+
+- Main ecosystem: https://mind-reply.com
+- Agency cockpit: https://control.mind-reply.com

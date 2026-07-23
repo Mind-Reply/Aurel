@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AUREL — Personal Operating System Agent Builder</title>
+  <meta name="description" content="Build your own command centre. AUREL is a modular, local-first operating system agent that acts as your private operator, project manager, architect, researcher, brand strategist, and execution assistant.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #050505;
+      --surface: #0f0f10;
+      --border: #1f1f22;
+      --text: #f4f4f5;
+      --muted: #a1a1aa;
+      --accent: #8b5cf6;
+      --accent-2: #d946ef;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: 'Inter', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+    }
+    .gradient-text {
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+    nav {
+      border-bottom: 1px solid var(--border);
+      padding: 20px 0;
+    }
+    nav .container {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .logo {
+      font-weight: 800;
+      font-size: 1.5rem;
+      letter-spacing: -0.03em;
+    }
+    .badge {
+      font-size: 0.7rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      padding: 6px 12px;
+      border-radius: 999px;
+      background: rgba(139, 92, 246, 0.12);
+      border: 1px solid rgba(139, 92, 246, 0.25);
+      color: #c4b5fd;
+    }
+    .hero {
+      padding: 120px 0 80px;
+      text-align: center;
+    }
+    .hero h1 {
+      font-size: clamp(2.5rem, 6vw, 4.5rem);
+      font-weight: 800;
+      letter-spacing: -0.04em;
+      line-height: 1.05;
+      margin: 0 0 24px;
+    }
+    .hero p {
+      font-size: 1.25rem;
+      color: var(--muted);
+      max-width: 680px;
+      margin: 0 auto 40px;
+    }
+    .cta {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      padding: 16px 32px;
+      border-radius: 16px;
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      color: white;
+      font-weight: 700;
+      text-decoration: none;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .cta:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 40px rgba(139, 92, 246, 0.3);
+    }
+    .section {
+      padding: 80px 0;
+      border-top: 1px solid var(--border);
+    }
+    .section h2 {
+      font-size: 2rem;
+      font-weight: 700;
+      margin: 0 0 40px;
+      text-align: center;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 24px;
+    }
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 28px;
+      transition: border-color 0.2s;
+    }
+    .card:hover {
+      border-color: rgba(139, 92, 246, 0.4);
+    }
+    .card h3 {
+      margin: 0 0 12px;
+      font-size: 1.15rem;
+      font-weight: 700;
+    }
+    .card p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+    .agents {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 16px;
+      margin-top: 40px;
+    }
+    .agent {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 18px 24px;
+      text-align: center;
+      min-width: 180px;
+    }
+    .agent .icon {
+      font-size: 1.75rem;
+      margin-bottom: 8px;
+    }
+    .agent .name {
+      font-weight: 700;
+      font-size: 0.95rem;
+    }
+    .agent .role {
+      font-size: 0.8rem;
+      color: var(--muted);
+    }
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 40px 0;
+      text-align: center;
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+    footer a {
+      color: #c4b5fd;
+      text-decoration: none;
+    }
+  </style>
+</head>
+<body>
+  <nav>
+    <div class="container">
+      <div class="logo gradient-text">AUREL</div>
+      <div class="badge">OS Agent Builder</div>
+    </div>
+  </nav>
+
+  <section class="hero">
+    <div class="container">
+      <h1>Build Your Own<br><span class="gradient-text">Operating System Agent</span></h1>
+      <p>AUREL is a modular, local-first command centre that serves as your private operator, project manager, technical architect, research partner, brand strategist, and execution assistant.</p>
+      <a href="https://mind-reply.com" class="cta">Enter the MindReply Ecosystem →</a>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container">
+      <h2>Core Architecture</h2>
+      <div class="grid">
+        <div class="card">
+          <h3>Local Layer</h3>
+          <p>Python + FastAPI + Docker. Manages private files, memory, automation, and local models via Ollama.</p>
+        </div>
+        <div class="card">
+          <h3>Cloud Layer</h3>
+          <p>Supabase for auth, storage, database, edge functions, real-time sync, and remote dashboards.</p>
+        </div>
+        <div class="card">
+          <h3>Agent Network</h3>
+          <p>A11 Personal Agent plus CEO, Brand, Developer, GitHub Ops, Research, Marketing, and Finance agents.</p>
+        </div>
+        <div class="card">
+          <h3>Memory System</h3>
+          <p>Three layers: short-term tasks, long-term knowledge, and strategic vision with full recall.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container">
+      <h2>Agent Roster</h2>
+      <div class="agents">
+        <div class="agent"><div class="icon">🧠</div><div class="name">A11</div><div class="role">Personal Operator</div></div>
+        <div class="agent"><div class="icon">🎯</div><div class="name">CEO</div><div class="role">Strategy & Priorities</div></div>
+        <div class="agent"><div class="icon">🎨</div><div class="name">Brand</div><div class="role">Positioning & Assets</div></div>
+        <div class="agent"><div class="icon">💻</div><div class="name">Developer</div><div class="role">Code & Architecture</div></div>
+        <div class="agent"><div class="icon">🐙</div><div class="name">GitHub Ops</div><div class="role">Repos & Releases</div></div>
+        <div class="agent"><div class="icon">🔬</div><div class="name">Research</div><div class="role">Market & Trends</div></div>
+        <div class="agent"><div class="icon">📈</div><div class="name">Marketing</div><div class="role">Campaigns & Growth</div></div>
+        <div class="agent"><div class="icon">💰</div><div class="name">Finance</div><div class="role">Revenue & Models</div></div>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="container">
+      Part of the <a href="https://mind-reply.com">MindReply</a> ecosystem · <a href="https://control.mind-reply.com">ReplyControl</a>
+    </div>
+  </footer>
+</body>
+</html>
