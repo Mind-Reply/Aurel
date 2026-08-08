@@ -1,0 +1,24 @@
+name: Atelier Keeper
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '13 * * * *'
+permissions:
+  contents: read
+  issues: write
+jobs:
+  atelier:
+    name: Curator / experience pulse
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify experience charter
+        run: test -f docs/IDENTITY.md
+      - name: Inspect public-facing surface
+        run: |
+          find . -maxdepth 2 -type f | sort | head -150
+      - name: Record curator exception
+        if: failure()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh issue create --title "Atelier curator exception" --body "A scheduled integrity check failed. Review the experience surface manually before changing public behavior." || true
