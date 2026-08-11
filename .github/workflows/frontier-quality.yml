@@ -1,0 +1,49 @@
+name: Frontier Quality
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  schedule:
+    - cron: '17 * * * *'
+  workflow_dispatch:
+
+concurrency:
+  group: frontier-quality-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+      - name: Check required production contract
+        run: |
+          test -f package.json
+          test -f index.html
+          echo 'Production contract present'
+
+  production-health:
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Probe canonical production URL
+        env:
+          URL: https://aurel.a11-k.space
+        run: |
+          code=$(curl -L -sS -o /tmp/body -w '%{http_code}' --max-time 20 "$URL")
+          echo "HTTP $code $URL"
+          test "$code" -ge 200
+          test "$code" -lt 400
+          if grep -Eiq '404|not found|application error' /tmp/body; then
+            echo 'Detected accidental error content'
+            exit 1
+          fi
