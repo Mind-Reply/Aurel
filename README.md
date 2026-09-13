@@ -1,22 +1,25 @@
 # Aurel — The Atelier
 
-Aurel is the premium experience product within the Mind-Reply estate. It owns atmosphere, gesture, visual craft and distinctive digital presence rather than operational control-plane behavior.
+Aurel is the premium experience product within the Mind-Reply estate. It owns atmosphere, interaction craft, visual identity and distinctive digital presence; it is not the operational control plane.
 
-## Product boundary
+## Product function
 
-- Experience product, not MindReply's canonical web/API root.
-- Keep Aurel's visual identity and interaction language independent.
-- Shared infrastructure, telemetry and delivery contracts are allowed where they reduce duplication without flattening the product.
-- Consequential automation must remain explicit and recoverable.
-
-## Deployment
-
-The repository describes a static experience surface for `aurel.mind-reply.com`. The actual delivery binding must be verified from the hosting provider before production status is claimed.
+- Premium experience and brand surface.
+- Independent visual and interaction language.
+- Shared infrastructure, telemetry and delivery tooling only where compatible with the product boundary.
+- Consequential automation must be explicit, reversible and evidenced.
 
 ## Estate relationship
 
-- Canonical platform source: `Mind-Reply/mindreply`
+- Canonical platform: `Mind-Reply/mindreply`
 - Control plane: `Mind-Reply/control-plane`
 - A11-K: `Mind-Reply/A11-K`
+- Migration/reference source: `Mind-Reply/mind-reply-core`
 
-Aurel remains a separate product/module with its own deployment and design contract.
+## Delivery contract
+
+The repository is the source for Aurel experience work. Hosting bindings, domains and production health must be verified from the delivery provider; source presence or a successful platform build alone is not production proof.
+
+No DNS, routing, credentials, billing or external-service changes are made by repository reconciliation without explicit owner approval.
+
+Cross-estate classification and evidence are maintained in `Mind-Reply/mindreply/ESTATE_RECONSTRUCTION_AUDIT_2026-09-13.md`.
