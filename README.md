@@ -11,7 +11,7 @@ Aurel is the premium experience product within the Mind-Reply estate. It owns at
 
 ## Estate relationship
 
-- Canonical platform: `Mind-Reply/mindreply`
+- Canonical platform: `Mind-Reply/mindreply-app`
 - Control plane: `Mind-Reply/control-plane`
 - A11-K: `Mind-Reply/A11-K`
 - Migration/reference source: `Mind-Reply/mind-reply-core`
@@ -22,4 +22,4 @@ The repository is the source for Aurel experience work. Hosting bindings, domain
 
 No DNS, routing, credentials, billing or external-service changes are made by repository reconciliation without explicit owner approval.
 
-Cross-estate classification and evidence are maintained in `Mind-Reply/mindreply/ESTATE_RECONSTRUCTION_AUDIT_2026-09-13.md`.
+Cross-estate classification and evidence are maintained in `Mind-Reply/mindreply-app/ESTATE_RECONSTRUCTION_AUDIT_2026-09-13.md`.
