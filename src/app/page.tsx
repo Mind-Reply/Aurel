@@ -355,6 +355,15 @@ export default function Home() {
         </Reveal>
       </section>
 
+
+      <div className="fixed inset-x-4 bottom-4 z-50 md:hidden">
+        <nav aria-label="Quick navigation" className="flex items-center justify-between rounded-2xl border border-aurel-gold/20 bg-[#0A0A0A]/90 p-2 shadow-2xl backdrop-blur-xl">
+          <Link href="/" className="flex-1 rounded-xl bg-aurel-gold/10 px-2 py-3 text-center text-[9px] uppercase tracking-[.14em] text-aurel-gold">Aurel</Link>
+          <Link href="/about" className="flex-1 rounded-xl px-2 py-3 text-center text-[9px] uppercase tracking-[.14em] text-aurel-stone transition hover:text-aurel-pearl">Standard</Link>
+          <Link href="/inquiry" className="flex-1 rounded-xl px-2 py-3 text-center text-[9px] uppercase tracking-[.14em] text-aurel-stone transition hover:text-aurel-pearl">Inquiry</Link>
+        </nav>
+      </div>
+
       <Footer />
     </main>
   )
