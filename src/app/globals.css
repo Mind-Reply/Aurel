@@ -89,3 +89,16 @@ body {
   opacity: 1;
   transform: translateY(0);
 }
+
+
+/* Experience polish — quiet luxury, tactile controls, mobile-first rhythm */
+html{background:#0A0A0A;overscroll-behavior-y:none}
+body{-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+a,button{touch-action:manipulation}
+button{cursor:pointer}
+.glass-card,.gold-button{transition:transform .45s cubic-bezier(.2,.8,.2,1),border-color .35s,box-shadow .45s}
+.glass-card:hover{transform:translateY(-3px);box-shadow:0 24px 70px rgba(0,0,0,.22);border-color:rgba(201,169,110,.28)}
+.gold-button:active{transform:translateY(1px) scale(.985)}
+a:focus-visible,button:focus-visible{outline:2px solid #C9A96E;outline-offset:5px}
+@media(max-width:640px){.glass-card{border-radius:14px}.reveal{transform:translateY(18px)}}
+@media(prefers-reduced-motion:reduce){.glass-card,.gold-button,.reveal{transition:none!important}}
