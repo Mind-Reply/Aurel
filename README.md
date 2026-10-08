@@ -12,7 +12,8 @@ Aurel is the premium experience product within the Mind-Reply estate. It owns at
 ## Estate relationship
 
 - Canonical platform: `Mind-Reply/mindreply-app`
-- Control plane: `Mind-Reply/control-plane`
+- Private owner-control source: `angellllkr-eng/agent-control-plane`
+- Organization control-plane repository: `Mind-Reply/control-plane` (legacy/source-freeze)
 - A11-K: `Mind-Reply/A11-K`
 - Migration/reference source: `Mind-Reply/mind-reply-core`
 
