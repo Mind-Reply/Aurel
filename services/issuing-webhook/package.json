@@ -1,0 +1,15 @@
+{
+  "name": "aurel-issuing-webhook",
+  "version": "1.0.0",
+  "private": true,
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "check": "node --check index.js"
+  },
+  "dependencies": {
+    "express": "^4.21.2",
+    "pg": "^8.13.1",
+    "stripe": "^17.5.0"
+  }
+}
