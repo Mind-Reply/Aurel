@@ -36,6 +36,14 @@ export const issuingLedgerWorker = new Worker<WebhookJobData>(
       await client.query('BEGIN');
       inTransaction = true;
 
+      // Serialize deliveries for the same Stripe transaction before checking idempotency.
+      // This closes the race where two distinct Stripe event IDs describe one transaction.
+      await client.query('SELECT pg_advisory_xact_lock(hashtextextended($1, 0))', [tx.id]);
+
+      if (tx.type !== 'capture' && tx.type !== 'refund') {
+        throw new Error(`Unsupported Issuing transaction type for ledger posting: ${tx.type}`);
+      }
+
       // The transaction ID unique constraint is the final idempotency guard.
       const existing = await client.query(
         'SELECT journal_entry_id FROM stripe_issuing_transactions WHERE stripe_transaction_id = $1',
