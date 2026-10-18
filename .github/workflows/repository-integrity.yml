@@ -16,6 +16,23 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          mapfile -d '' tracked_files < <(git ls-files -z)
+          forbidden=()
+          for file in "${tracked_files[@]}"; do
+            base="${file##*/}"
+            case "$base" in
+              .env.example|.env.template|.env.production.example|.env.development.example|.env.test.example)
+                # Tracked templates are permitted only as examples with no real credentials.
+                continue
+                ;;
+              .env|.env.*|*.pem|*.key|credentials.json)
+                forbidden+=("$file")
+                ;;
+            esac
+          done
+          if (("${#forbidden[@]}" > 0)); then
+            echo "::error::Potential secret-bearing files are tracked:"
+            printf '%s\n' "${forbidden[@]}"
           forbidden=""
           while IFS= read -r path; do
             base="${path##*/}"
