@@ -1,0 +1,77 @@
+name: Vanguard & SEPA 15-Min Telemetry Sentinel
+
+on:
+  schedule:
+    - cron: "*/15 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: vanguard-sepa-telemetry
+  cancel-in-progress: false
+
+jobs:
+  run-telemetry:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - name: Probe endpoints and relay status
+        shell: bash
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: |
+          set -uo pipefail
+          timestamp="$(date -u +'%Y-%m-%dT%H:%M:%SZ')"
+          endpoints=(
+            "https://api.aziwdgndohdgnwztpwdi.supabase.co/auth/v1/health"
+            "https://mind-reply.com"
+            "https://akv-transport.co.uk"
+          )
+          message="Vanguard & SEPA telemetry heartbeat — ${timestamp}"
+          status_ok=true
+
+          for url in "${endpoints[@]}"; do
+            code="$(curl --silent --show-error --output /dev/null --write-out '%{http_code}' --connect-timeout 5 --max-time 10 "$url" 2>/dev/null)"
+            curl_rc=$?
+            if [[ $curl_rc -ne 0 || ! "$code" =~ ^[0-9]{3}$ ]]; then
+              code="000"
+            fi
+
+            if [[ "$code" =~ ^[0-9]{3}$ ]] && (( 10#$code >= 200 && 10#$code < 400 )); then
+              message+=$'\n' "OK  $url — HTTP $code"
+            else
+              message+=$'\n' "ALERT  $url — HTTP $code"
+              status_ok=false
+            fi
+          done
+
+          # Notifications are optional until the matching GitHub Actions secrets are configured.
+          if [[ -n "${TELEGRAM_BOT_TOKEN:-}" && -n "${TELEGRAM_CHAT_ID:-}" ]]; then
+            telegram_code="$(curl --silent --show-error --output /tmp/telegram-response.json --write-out '%{http_code}' --max-time 10               --request POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage"               --data-urlencode "chat_id=${TELEGRAM_CHAT_ID}"               --data-urlencode "text=${message}" 2>/dev/null)" || telegram_code="000"
+            if [[ ! "$telegram_code" =~ ^2[0-9]{2}$ ]]; then
+              echo "Telegram relay failed with HTTP ${telegram_code:-000}"
+              status_ok=false
+            fi
+          else
+            echo "Telegram relay skipped: TELEGRAM_BOT_TOKEN or TELEGRAM_CHAT_ID secret is not configured."
+          fi
+
+          if [[ -n "${DISCORD_WEBHOOK:-}" ]]; then
+            python3 -c 'import json,sys; print(json.dumps({"content": sys.stdin.read()}))' <<< "$message" > /tmp/discord-payload.json
+            discord_code="$(curl --silent --show-error --output /dev/null --write-out '%{http_code}' --max-time 10               --request POST --header 'Content-Type: application/json'               --data-binary @/tmp/discord-payload.json "${DISCORD_WEBHOOK}" 2>/dev/null)" || discord_code="000"
+            if [[ ! "$discord_code" =~ ^2[0-9]{2}$ ]]; then
+              echo "Discord relay failed with HTTP ${discord_code:-000}"
+              status_ok=false
+            fi
+          else
+            echo "Discord relay skipped: DISCORD_WEBHOOK_URL secret is not configured."
+          fi
+
+          if [[ "$status_ok" != true ]]; then
+            echo "Telemetry probe or configured notification relay failed."
+            exit 1
+          fi
