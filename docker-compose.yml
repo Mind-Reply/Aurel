@@ -8,8 +8,8 @@ services:
     ports:
       - "3000:3000"
     environment:
-      - NODE_ENV=production
-      - NEXT_TELEMETRY_DISABLED=1
+      NODE_ENV: production
+      NEXT_TELEMETRY_DISABLED: "1"
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "node", "-e", "require('http').get('http://localhost:3000/', r => process.exit(r.statusCode === 200 ? 0 : 1)).on('error', () => process.exit(1))"]
@@ -17,3 +17,77 @@ services:
       timeout: 10s
       retries: 3
       start_period: 20s
+
+  ledger-db:
+    image: postgres:16-alpine
+    container_name: aurel-ledger-db
+    environment:
+      POSTGRES_USER: a11_admin
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in your local .env}
+      POSTGRES_DB: sovereign_ledger
+    ports:
+      - "127.0.0.1:5432:5432"
+    volumes:
+      - ./migrations/20261018_issuing_ledger.sql:/docker-entrypoint-initdb.d/01_init.sql:ro
+      - ledger_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U a11_admin -d sovereign_ledger"]
+      interval: 3s
+      timeout: 3s
+      retries: 10
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    container_name: aurel-redis
+    command: ["redis-server", "--appendonly", "yes", "--maxmemory-policy", "noeviction"]
+    ports:
+      - "127.0.0.1:6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 3s
+      timeout: 3s
+      retries: 10
+    restart: unless-stopped
+
+  issuing-webhook:
+    build:
+      context: .
+      dockerfile: services/issuing-webhook/Dockerfile
+    image: aurel-issuing-webhook:local
+    container_name: aurel-issuing-webhook
+    depends_on:
+      redis:
+        condition: service_healthy
+    environment:
+      PORT: 8086
+      NODE_ENV: development
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY:?Set STRIPE_SECRET_KEY in your local .env}
+      STRIPE_ISSUING_WEBHOOK_SECRET: ${STRIPE_ISSUING_WEBHOOK_SECRET:?Set STRIPE_ISSUING_WEBHOOK_SECRET in your local .env}
+    ports:
+      - "127.0.0.1:8086:8086"
+    restart: unless-stopped
+
+  issuing-worker:
+    image: aurel-issuing-webhook:local
+    container_name: aurel-issuing-worker
+    command: ["npm", "run", "worker"]
+    depends_on:
+      redis:
+        condition: service_healthy
+      ledger-db:
+        condition: service_healthy
+    environment:
+      NODE_ENV: development
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      DATABASE_URL: postgres://a11_admin:${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in your local .env}@ledger-db:5432/sovereign_ledger
+    restart: unless-stopped
+
+volumes:
+  ledger_pgdata:
+  redis_data:
