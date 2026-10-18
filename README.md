@@ -24,3 +24,9 @@ The repository is the source for Aurel experience work. Hosting bindings, domain
 No DNS, routing, credentials, billing or external-service changes are made by repository reconciliation without explicit owner approval.
 
 Cross-estate classification and evidence are maintained in `Mind-Reply/mindreply-app/ESTATE_RECONSTRUCTION_AUDIT_2026-09-13.md`.
+
+## Optional design-system concepts
+
+- [Aurel Afterglow preview](docs/design-system/preview.html) — isolated visual option; not production UI.
+- [Design-system notes and source provenance](docs/design-system/README.md) — explains the product-boundary decision and review checks.
+- The existing premium-connectivity pages and gold/Cormorant design remain unchanged until the owner explicitly selects another direction.
