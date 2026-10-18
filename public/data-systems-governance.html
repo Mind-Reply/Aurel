@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Interactive exploration of data safeguards, governance and hybrid modeling pipelines." />
+  <title>Data Systems Architecture &amp; Governance Framework</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+  <style>
+    :root{--bg-canvas:#f8fafc;--bg-surface:#fff;--bg-subtle:#f1f5f9;--border-subtle:#e2e8f0;--border-hover:#cbd5e1;--text-main:#0f172a;--text-muted:#64748b;--accent:#2563eb;--accent-soft:#eff6ff;--emerald:#059669;--emerald-soft:#ecfdf5;--amber:#d97706;--amber-soft:#fffbeb;--shadow-sm:0 1px 2px 0 rgb(0 0 0/.05);--shadow-md:0 4px 6px -1px rgb(0 0 0/.07),0 2px 4px -2px rgb(0 0 0/.05);--radius-sm:8px;--radius-md:12px;--radius-lg:16px}
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:'Plus Jakarta Sans',-apple-system,BlinkMacSystemFont,sans-serif;background:var(--bg-canvas);color:var(--text-main);line-height:1.5;padding:2.5rem 1.5rem}
+    .container{max-width:1140px;margin:0 auto}header{margin-bottom:2.5rem}.badge{display:inline-block;font-size:.75rem;font-weight:600;letter-spacing:.05em;text-transform:uppercase;padding:.35rem .75rem;border-radius:9999px;background:var(--accent-soft);color:var(--accent);margin-bottom:.75rem}
+    h1{font-family:'Space Grotesk',sans-serif;font-size:clamp(1.8rem,4vw,2.25rem);font-weight:700;letter-spacing:-.03em;color:var(--text-main);margin-bottom:.5rem}.subtitle{color:var(--text-muted);font-size:1rem;max-width:650px}
+    .view-switcher{display:inline-flex;flex-wrap:wrap;gap:.25rem;background:var(--bg-subtle);padding:.25rem;border-radius:var(--radius-md);border:1px solid var(--border-subtle);margin-bottom:2rem}
+    .tab-btn{border:0;background:transparent;padding:.6rem 1.25rem;font-size:.875rem;font-weight:600;color:var(--text-muted);border-radius:var(--radius-sm);cursor:pointer}.tab-btn.active{background:var(--bg-surface);color:var(--text-main);box-shadow:var(--shadow-sm)}
+    .panel{display:none;animation:fadeIn .3s ease-out}.panel.active{display:block}@keyframes fadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+    .grid-2{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,320px),1fr));gap:1.5rem}.card{background:var(--bg-surface);border:1px solid var(--border-subtle);border-radius:var(--radius-lg);padding:1.75rem;box-shadow:var(--shadow-sm);transition:box-shadow .2s,border-color .2s}.card:hover{box-shadow:var(--shadow-md);border-color:var(--border-hover)}
+    .card-title{font-family:'Space Grotesk',sans-serif;font-size:1.15rem;font-weight:700;margin-bottom:.5rem;display:flex;align-items:center;gap:.5rem}.card-desc{color:var(--text-muted);font-size:.875rem;margin-bottom:1.25rem}
+    .toggle-list{display:flex;flex-direction:column;gap:.75rem}.interactive-item{padding:.9rem;border:1px solid var(--border-subtle);border-radius:var(--radius-sm);background:var(--bg-canvas);cursor:pointer;transition:background .2s,border-color .2s}.interactive-item:hover{background:var(--bg-surface);border-color:var(--accent)}.interactive-item.selected{border-color:var(--accent);background:var(--accent-soft)}
+    .item-header{display:flex;justify-content:space-between;align-items:center;gap:.75rem;font-size:.875rem;font-weight:600}.item-details{margin-top:.5rem;font-size:.8125rem;color:var(--text-muted);display:none}.interactive-item.selected .item-details{display:block}
+    .pipeline{display:flex;flex-direction:column;gap:1rem}.pipeline-step{display:flex;gap:1.25rem;align-items:flex-start;background:var(--bg-surface);border:1px solid var(--border-subtle);padding:1.25rem;border-radius:var(--radius-md)}
+    .step-number{font-family:'Space Grotesk',sans-serif;font-size:1.1rem;font-weight:700;color:var(--accent);background:var(--accent-soft);width:36px;height:36px;display:flex;align-items:center;justify-content:center;border-radius:50%;flex-shrink:0}
+    .sim-panel{background:var(--bg-surface);border:1px solid var(--border-subtle);border-radius:var(--radius-lg);padding:1.75rem;margin-top:1.5rem}.metric-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,180px),1fr));gap:1rem;margin-top:1.25rem}.metric-card{background:var(--bg-canvas);padding:1rem;border-radius:var(--radius-sm);border:1px solid var(--border-subtle)}.metric-label{font-size:.75rem;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em}.metric-val{font-family:'Space Grotesk',sans-serif;font-size:1.4rem;font-weight:700;color:var(--text-main);margin-top:.25rem}.range-slider{width:100%;accent-color:var(--accent);margin:1rem 0}
+    button:focus-visible,input:focus-visible,.interactive-item:focus-visible{outline:3px solid #93c5fd;outline-offset:3px}.interactive-item[role=button]{cursor:pointer}
+    @media(max-width:600px){body{padding:1.25rem .875rem}.card,.sim-panel{padding:1.2rem}.tab-btn{padding:.55rem .8rem}.pipeline-step{gap:.8rem;padding:1rem}}
+    @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important;scroll-behavior:auto!important}}
+  </style>
+</head>
+<body>
+  <main class="container">
+    <header>
+      <span class="badge">Operational Visualizer</span>
+      <h1>Data Systems &amp; Governance Framework</h1>
+      <p class="subtitle">Interactive exploration of safeguards vs. enablers and multi-source downscaling pipelines.</p>
+    </header>
+    <div class="view-switcher" role="tablist" aria-label="Framework tracks">
+      <button class="tab-btn active" id="tab-governance" role="tab" aria-selected="true" aria-controls="panel-governance" onclick="switchTab('governance')">Track 1: Governance &amp; Trust</button>
+      <button class="tab-btn" id="tab-modeling" role="tab" aria-selected="false" aria-controls="panel-modeling" onclick="switchTab('modeling')">Track 2: Hybrid Modeling Pipeline</button>
+    </div>
+    <section id="panel-governance" class="panel active" role="tabpanel" aria-labelledby="tab-governance">
+      <div class="grid-2">
+        <article class="card">
+          <h2 class="card-title" style="color:var(--amber)"><span aria-hidden="true">🛡️</span> Data Safeguards (Trust Foundation)</h2>
+          <p class="card-desc">Protocols preventing abuse, ensuring PII integrity, and controlling access limits.</p>
+          <div class="toggle-list" id="safeguards-list">
+            <div class="interactive-item" role="button" tabindex="0" aria-expanded="false" onclick="toggleDetails(this)" onkeydown="itemKeydown(event,this)"><div class="item-header"><span>Personal Data Rights &amp; GDPR Adequacy</span><span aria-hidden="true">+</span></div><div class="item-details">Mandates verifiable consent, data subject rights, and restricted cross-border transmission without strict compliance adequacy.</div></div>
+            <div class="interactive-item" role="button" tabindex="0" aria-expanded="false" onclick="toggleDetails(this)" onkeydown="itemKeydown(event,this)"><div class="item-header"><span>Tokenization &amp; Spatial Anonymization</span><span aria-hidden="true">+</span></div><div class="item-details">Automated de-identification pipelines stripping direct identifiers and jittering precise coordinates to maintain privacy while retaining analytical utility.</div></div>
+            <div class="interactive-item" role="button" tabindex="0" aria-expanded="false" onclick="toggleDetails(this)" onkeydown="itemKeydown(event,this)"><div class="item-header"><span>Least-Privilege Scoped Access</span><span aria-hidden="true">+</span></div><div class="item-details">Strict partition boundaries between storage environments, zero unvetted external shares, and strict role-based token delegation.</div></div>
+          </div>
+        </article>
+        <article class="card">
+          <h2 class="card-title" style="color:var(--emerald)"><span aria-hidden="true">⚡</span> Data Enablers (Value &amp; Reuse)</h2>
+          <p class="card-desc">Mechanisms facilitating fluid, safe data exchange across departments and applications.</p>
+          <div class="toggle-list" id="enablers-list">
+            <div class="interactive-item" role="button" tabindex="0" aria-expanded="false" onclick="toggleDetails(this)" onkeydown="itemKeydown(event,this)"><div class="item-header"><span>Interoperable Machine-Readable Formats</span><span aria-hidden="true">+</span></div><div class="item-details">Adopting universal schemas (JSON/Parquet/GeoJSON) and standardized classification standards to allow automatic ingestion across teams.</div></div>
+            <div class="interactive-item" role="button" tabindex="0" aria-expanded="false" onclick="toggleDetails(this)" onkeydown="itemKeydown(event,this)"><div class="item-header"><span>API Portability &amp; Open Standards</span><span aria-hidden="true">+</span></div><div class="item-details">Standard contractual clauses and secure endpoint architecture that empower secure bilateral transfer between public and private systems.</div></div>
+            <div class="interactive-item" role="button" tabindex="0" aria-expanded="false" onclick="toggleDetails(this)" onkeydown="itemKeydown(event,this)"><div class="item-header"><span>Proactive Open-Data Licensing</span><span aria-hidden="true">+</span></div><div class="item-details">Pre-approved terms of use that lower transaction friction for academic, public, and development analytics without manual clearance hurdles.</div></div>
+          </div>
+        </article>
+      </div>
+    </section>
+    <section id="panel-modeling" class="panel" role="tabpanel" aria-labelledby="tab-modeling" hidden>
+      <div class="pipeline">
+        <article class="pipeline-step"><div class="step-number">01</div><div><h2 style="font-size:1rem;font-weight:700;margin-bottom:.25rem">Ground-Truth Public Baseline (Census / Surveys)</h2><p style="font-size:.875rem;color:var(--text-muted)">Representative national household survey baseline. Accurate and statistically unbiased, but slow to collect and low in geographic resolution (e.g., regional aggregates).</p></div></article>
+        <article class="pipeline-step"><div class="step-number">02</div><div><h2 style="font-size:1rem;font-weight:700;margin-bottom:.25rem">High-Frequency Telemetric Layer (Satellite / CDR / Signals)</h2><p style="font-size:.875rem;color:var(--text-muted)">Continuous auxiliary data streams: multi-spectral satellite imagery, remote sensors, and transaction footprints providing dense spatial &amp; temporal granularity.</p></div></article>
+        <article class="pipeline-step"><div class="step-number">03</div><div><h2 style="font-size:1rem;font-weight:700;margin-bottom:.25rem">Downscaling &amp; ML Fusion (Nowcasting)</h2><p style="font-size:.875rem;color:var(--text-muted)">Calibrating satellite/telemetry features against ground-truth points to predict micro-indicators at the district or village boundary. Prediction error and bias must be validated against held-out ground truth; higher resolution alone does not guarantee statistical precision.</p></div></article>
+      </div>
+      <div class="sim-panel">
+        <h2 style="font-size:1.1rem;font-weight:700">Downscaling Resolution Simulator</h2>
+        <p style="font-size:.875rem;color:var(--text-muted)">Adjust the auxiliary telemetry density to see illustrative changes in map granularity and assumed error margins. These values are examples, not validated empirical estimates.</p>
+        <label for="density-slider" style="display:block;font-size:.8125rem;font-weight:600;margin-top:1rem">Auxiliary Data Layer Density: <span id="density-val" style="color:var(--accent)">Level 1 (Regional Only)</span></label>
+        <input type="range" id="density-slider" class="range-slider" min="1" max="4" value="1" step="1" oninput="updateSimulation(this.value)" aria-describedby="simulation-note">
+        <p id="simulation-note" style="font-size:.75rem;color:var(--text-muted)">Illustrative scenario only; confidence and cadence depend on data quality, sampling, geography, and validation.</p>
+        <div class="metric-grid">
+          <div class="metric-card"><div class="metric-label">Target Granularity</div><div class="metric-val" id="metric-granularity">20 Regions</div></div>
+          <div class="metric-card"><div class="metric-label">Illustrative Error Margin</div><div class="metric-val" id="metric-confidence">± 8.4%</div></div>
+          <div class="metric-card"><div class="metric-label">Illustrative Update Cadence</div><div class="metric-val" id="metric-cadence">Every 5–10 yrs</div></div>
+        </div>
+      </div>
+    </section>
+  </main>
+  <script>
+    function switchTab(trackId) {
+      const governance = trackId === 'governance';
+      document.querySelectorAll('.tab-btn').forEach(btn => {
+        const active = btn.id === (governance ? 'tab-governance' : 'tab-modeling');
+        btn.classList.toggle('active', active);
+        btn.setAttribute('aria-selected', String(active));
+      });
+      document.querySelectorAll('.panel').forEach(panel => {
+        const active = panel.id === (governance ? 'panel-governance' : 'panel-modeling');
+        panel.classList.toggle('active', active);
+        panel.hidden = !active;
+      });
+    }
+    function toggleDetails(element) {
+      const wasSelected = element.classList.contains('selected');
+      element.parentElement.querySelectorAll('.interactive-item').forEach(item => {
+        item.classList.remove('selected');
+        item.setAttribute('aria-expanded', 'false');
+        const sign = item.querySelector('.item-header span:last-child');
+        if (sign) sign.textContent = '+';
+      });
+      if (!wasSelected) {
+        element.classList.add('selected');
+        element.setAttribute('aria-expanded', 'true');
+        const sign = element.querySelector('.item-header span:last-child');
+        if (sign) sign.textContent = '−';
+      }
+    }
+    function itemKeydown(event, element) {
+      if (event.key === 'Enter' || event.key === ' ') {
+        event.preventDefault();
+        toggleDetails(element);
+      }
+    }
+    function updateSimulation(val) {
+      const levels = {
+        "1": {label:"Level 1 (Survey Baseline Only)",gran:"20 Regions",conf:"± 8.4%",cad:"Every 5–10 yrs"},
+        "2": {label:"Level 2 (+ Nighttime Lights)",gran:"65 Provinces",conf:"± 5.1%",cad:"Annual"},
+        "3": {label:"Level 3 (+ High-Res Optical Imagery)",gran:"169 Districts",conf:"± 2.3%",cad:"Quarterly"},
+        "4": {label:"Level 4 (+ Mobile Telemetry / CDR)",gran:"1,200+ Wards",conf:"± 0.9%",cad:"Near Real-Time"}
+      };
+      const current = levels[val];
+      if (!current) return;
+      document.getElementById('density-val').textContent = current.label;
+      document.getElementById('metric-granularity').textContent = current.gran;
+      document.getElementById('metric-confidence').textContent = current.conf;
+      document.getElementById('metric-cadence').textContent = current.cad;
+    }
+  </script>
+</body>
+</html>
