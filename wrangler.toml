@@ -2,7 +2,5 @@ name = "aurel"
 compatibility_date = "2026-07-01"
 pages_build_output_dir = "public"
 
-[[d1_databases]]
-binding = "UNIVERSE_DB"
-database_name = "aurel-db"
-database_id = "REPLACE_WITH_D1_DATABASE_ID"
+# Intentionally no D1 binding until a real, account-verified database ID is provisioned.
+# The intake endpoint must remain fail-closed (NEEDS_D1_BINDING) until then.
