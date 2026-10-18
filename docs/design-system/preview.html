@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Aurel Afterglow — Design Option Preview</title>
+  <link rel="stylesheet" href="./aurel-afterglow.tokens.css">
+  <style>
+    *{box-sizing:border-box}
+    body{margin:0;background:var(--aurel-bg);color:var(--aurel-text);font:450 16px/1.6 var(--aurel-font-body)}
+    main{max-width:1120px;margin:auto;padding:clamp(20px,5vw,56px)}
+    .flag{display:inline-flex;border:1px solid var(--aurel-accent-ember);color:var(--aurel-accent-ember);border-radius:999px;padding:6px 12px;font:600 12px var(--aurel-font-mono);letter-spacing:.04em}
+    h1,h2,h3{font-family:var(--aurel-font-display);line-height:1.08;letter-spacing:-.035em}
+    h1{font-size:clamp(42px,8vw,82px);max-width:850px;margin:28px 0 18px}
+    h2{font-size:clamp(26px,4vw,38px);margin:52px 0 18px}
+    p{color:var(--aurel-text-muted);max-width:720px}
+    .accent{color:var(--aurel-accent-lime)}
+    .actions{display:flex;gap:12px;flex-wrap:wrap;margin:28px 0}
+    a.button,button{display:inline-flex;min-height:48px;align-items:center;justify-content:center;padding:12px 18px;border-radius:var(--aurel-radius-md);font:650 15px var(--aurel-font-body);text-decoration:none;border:1px solid var(--aurel-border)}
+    .primary{background:var(--aurel-accent-lime);color:var(--aurel-on-accent);border-color:var(--aurel-accent-lime)}
+    .secondary{background:var(--aurel-surface);color:var(--aurel-text)}
+    a:focus-visible,button:focus-visible{outline:3px solid var(--aurel-focus);outline-offset:4px}
+    .grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+    .swatch,.card{border:1px solid var(--aurel-border);border-radius:var(--aurel-radius-lg);overflow:hidden;background:var(--aurel-surface)}
+    .color{height:78px}
+    .swatch div:last-child{padding:12px;font:12px/1.5 var(--aurel-font-mono);color:var(--aurel-text-muted)}
+    .cards{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+    .card{padding:20px;box-shadow:var(--aurel-shadow-panel)}
+    .card h3{margin:0 0 8px;font-size:20px}
+    .card p{font-size:14px;margin:0 0 12px}
+    .pill{display:inline-block;border:1px solid var(--aurel-border);border-radius:999px;padding:4px 8px;color:var(--aurel-accent-lime);font:11px var(--aurel-font-mono)}
+    .sample{margin-top:22px;padding:22px;border:1px solid var(--aurel-border);border-radius:var(--aurel-radius-lg);background:linear-gradient(145deg,var(--aurel-surface-raised),var(--aurel-surface))}
+    .sample small{font:12px var(--aurel-font-mono);color:var(--aurel-accent-ember)}
+    footer{margin-top:56px;border-top:1px solid var(--aurel-border);padding-top:20px;color:var(--aurel-text-muted);font-size:13px}
+    @media(max-width:760px){.grid{grid-template-columns:repeat(2,minmax(0,1fr))}.cards{grid-template-columns:1fr}main{padding:22px}}
+    @media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;animation:none!important;transition:none!important}}
+  </style>
+</head>
+<body>
+<main>
+  <span class="flag">OPTIONAL CONCEPT · NOT PRODUCTION</span>
+  <h1>Clarity at the <span class="accent">edge of possibility.</span></h1>
+  <p>Aurel Afterglow is a design-system option imported from the supplied artifact pack. This page is an isolated visual sample; it does not imply that the assistant modes or any related functionality are implemented.</p>
+  <div class="actions">
+    <a class="button primary" href="#modes">Explore mode taxonomy</a>
+    <a class="button secondary" href="../">Return to design-system files</a>
+  </div>
+  <h2>Palette &amp; surfaces</h2>
+  <div class="grid">
+    <div class="swatch"><div class="color" style="background:var(--aurel-ink)"></div><div>INK<br>#0b0c10</div></div>
+    <div class="swatch"><div class="color" style="background:var(--aurel-surface-raised)"></div><div>RAISED<br>#1e222c</div></div>
+    <div class="swatch"><div class="color" style="background:var(--aurel-accent-lime)"></div><div>LIME<br>#c9ff6b</div></div>
+    <div class="swatch"><div class="color" style="background:var(--aurel-accent-ember)"></div><div>EMBER<br>#ff6a3d</div></div>
+  </div>
+  <div class="sample">
+    <small>CONTROL / PREVIEW</small>
+    <h2 style="margin:12px 0">One clear next step.</h2>
+    <p>Show the current state, explain what an action will change, and make approval boundaries visible before execution.</p>
+    <button class="primary" type="button" onclick="document.getElementById('notice').textContent='Preview only — no action was executed.'">Preview action</button>
+    <span id="notice" role="status" aria-live="polite" style="display:block;margin-top:12px;color:var(--aurel-text-muted)"></span>
+  </div>
+  <h2 id="modes">Proposed interaction modes</h2>
+  <div class="cards">
+    <article class="card"><span class="pill">READ-ONLY</span><h3>Sense</h3><p>Understand the request, context, and constraints.</p></article>
+    <article class="card"><span class="pill">SUGGEST ONLY</span><h3>Forecast</h3><p>Surface likely next needs and useful options before they are requested.</p></article>
+    <article class="card"><span class="pill">READ-ONLY</span><h3>Scout</h3><p>Research questions and return evidence with sources.</p></article>
+    <article class="card"><span class="pill">APPROVAL GATE</span><h3>Strategy</h3><p>Turn goals into plans, trade-offs, and decision paths.</p></article>
+    <article class="card"><span class="pill">DRAFT ONLY</span><h3>Studio</h3><p>Create and refine written, visual, and media content.</p></article>
+    <article class="card"><span class="pill">LOCAL FIRST</span><h3>Forge</h3><p>Build code, apps, integrations, and reusable systems.</p></article>
+    <article class="card"><span class="pill">READ-ONLY</span><h3>Lens</h3><p>Analyze files, data, and patterns, then explain what matters.</p></article>
+    <article class="card"><span class="pill">EXPLICIT APPROVAL</span><h3>Pilot</h3><p>Coordinate approved tools, apps, and workflows.</p></article>
+  </div>
+  <footer>Design sample only. Current Aurel production UI remains unchanged until the owner selects this direction and a reviewed implementation is completed.</footer>
+</main>
+</body>
+</html>
