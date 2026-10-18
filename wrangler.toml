@@ -1,6 +1,3 @@
 name = "aurel"
 compatibility_date = "2026-07-01"
 pages_build_output_dir = "public"
-
-# Intentionally no D1 binding until a real, account-verified database ID is provisioned.
-# The intake endpoint must remain fail-closed (NEEDS_D1_BINDING) until then.
