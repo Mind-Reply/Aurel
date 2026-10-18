@@ -43,7 +43,13 @@ jobs:
           echo "HTTP $code $URL"
           test "$code" -ge 200
           test "$code" -lt 400
-          if grep -Eiq '404|not found|application error' /tmp/body; then
-            echo 'Detected accidental error content'
+          if ! grep -Eiq 'AUREL|Aurel' /tmp/body; then
+            echo 'Expected AUREL content marker missing'
+            exit 1
+          fi
+          # Match actual error-page language, not every occurrence of the number 404
+          # in a healthy HTML document, script bundle, or linked asset.
+          if grep -Eiq '404[^[:alnum:]]{0,12}(not found|page)|this page could not be found|application error' /tmp/body; then
+            echo 'Detected an actual error-page marker'
             exit 1
           fi
