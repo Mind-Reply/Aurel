@@ -21,8 +21,8 @@ jobs:
           for file in "${tracked_files[@]}"; do
             base="${file##*/}"
             case "$base" in
-              .env.example|.env.template|.env.production.example|.env.development.example|.env.test.example)
-                # Tracked templates are permitted only as examples with no real credentials.
+              .env.example|.env.template|.env.production.example|.env.development.example|.env.test.example|.env.sample)
+                # Example templates are allowed; real secret-bearing files are not.
                 continue
                 ;;
               .env|.env.*|*.pem|*.key|credentials.json)
@@ -33,27 +33,6 @@ jobs:
           if (("${#forbidden[@]}" > 0)); then
             echo "::error::Potential secret-bearing files are tracked:"
             printf '%s\n' "${forbidden[@]}"
-          forbidden=""
-          while IFS= read -r path; do
-            base="${path##*/}"
-            case "$base" in
-              .env|.env.local|.env.production|.env.development|.env.staging|.env.*.local|.env.*.production|.env.*.development)
-                forbidden+="$path"$'\n'
-                ;;
-              .env.*)
-                case "$base" in
-                  .env.template|.env.example|.env.sample) ;;
-                  *) forbidden+="$path"$'\n' ;;
-                esac
-                ;;
-              *.pem|*.key|credentials.json)
-                forbidden+="$path"$'\n'
-                ;;
-            esac
-          done < <(git ls-files)
-          if [ -n "$forbidden" ]; then
-            echo "::error::Potential secret-bearing files are tracked:"
-            printf '%s' "$forbidden"
             exit 1
           fi
       - name: Repository gate result
