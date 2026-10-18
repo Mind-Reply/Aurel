@@ -12,14 +12,31 @@ jobs:
       - uses: actions/checkout@v4
       - name: Git whitespace check
         run: git diff --check
-      - name: Reject tracked local environment files
+      - name: Reject tracked secret-bearing files
         shell: bash
         run: |
           set -euo pipefail
-          forbidden="$(git ls-files | grep -E '(^|/)(\.env|\.env\..*|.*\.pem|.*\.key|credentials\.json)$' || true)"
+          forbidden=""
+          while IFS= read -r path; do
+            base="${path##*/}"
+            case "$base" in
+              .env|.env.local|.env.production|.env.development|.env.staging|.env.*.local|.env.*.production|.env.*.development)
+                forbidden+="$path"$'\n'
+                ;;
+              .env.*)
+                case "$base" in
+                  .env.template|.env.example|.env.sample) ;;
+                  *) forbidden+="$path"$'\n' ;;
+                esac
+                ;;
+              *.pem|*.key|credentials.json)
+                forbidden+="$path"$'\n'
+                ;;
+            esac
+          done < <(git ls-files)
           if [ -n "$forbidden" ]; then
             echo "::error::Potential secret-bearing files are tracked:"
-            printf '%s\n' "$forbidden"
+            printf '%s' "$forbidden"
             exit 1
           fi
       - name: Repository gate result
