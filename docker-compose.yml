@@ -8,8 +8,8 @@ services:
     ports:
       - "3000:3000"
     environment:
-      - NODE_ENV=production
-      - NEXT_TELEMETRY_DISABLED=1
+      NODE_ENV: production
+      NEXT_TELEMETRY_DISABLED: "1"
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "node", "-e", "require('http').get('http://localhost:3000/', r => process.exit(r.statusCode === 200 ? 0 : 1)).on('error', () => process.exit(1))"]
@@ -17,3 +17,41 @@ services:
       timeout: 10s
       retries: 3
       start_period: 20s
+
+  ledger-db:
+    image: postgres:16-alpine
+    container_name: aurel-ledger-db
+    environment:
+      POSTGRES_USER: a11_admin
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-local_dev_password_do_not_use_in_prod}
+      POSTGRES_DB: sovereign_ledger
+    ports:
+      - "127.0.0.1:5432:5432"
+    volumes:
+      - ./migrations/20261018_issuing_ledger.sql:/docker-entrypoint-initdb.d/01_init.sql:ro
+      - ledger_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U a11_admin -d sovereign_ledger"]
+      interval: 3s
+      timeout: 3s
+      retries: 10
+
+  issuing-webhook:
+    build:
+      context: .
+      dockerfile: services/issuing-webhook/Dockerfile
+    container_name: aurel-issuing-webhook
+    depends_on:
+      ledger-db:
+        condition: service_healthy
+    environment:
+      PORT: 8086
+      NODE_ENV: development
+      DATABASE_URL: postgres://a11_admin:${POSTGRES_PASSWORD:-local_dev_password_do_not_use_in_prod}@ledger-db:5432/sovereign_ledger
+      STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY:-sk_test_local_simulation_only}
+      STRIPE_ISSUING_WEBHOOK_SECRET: ${STRIPE_ISSUING_WEBHOOK_SECRET:-whsec_local_simulation_secret_test}
+    ports:
+      - "127.0.0.1:8086:8086"
+
+volumes:
+  ledger_pgdata:
