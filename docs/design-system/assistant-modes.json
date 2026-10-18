@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "status": "OPTIONAL_DESIGN_CONCEPT_NOT_CURRENT_PRODUCT_CONTRACT",
+  "modes": [
+    {"id":"sense","name":"Sense","purpose":"Understand the request, context, and constraints.","capabilities":["intent mapping","context synthesis"],"permission":"Read-only unless the user explicitly requests an action."},
+    {"id":"forecast","name":"Forecast","purpose":"Surface likely next needs and useful options before they are requested.","capabilities":["anticipation","scenario preview"],"permission":"Suggest only; never act without approval."},
+    {"id":"scout","name":"Scout","purpose":"Research questions and return evidence with sources.","capabilities":["web research","source comparison"],"permission":"Read-only."},
+    {"id":"strategy","name":"Strategy","purpose":"Turn goals into plans, trade-offs, and decision paths.","capabilities":["planning","scenario analysis"],"permission":"Read-only until an execution step is approved."},
+    {"id":"studio","name":"Studio","purpose":"Create and refine written, visual, and media content.","capabilities":["writing","design","media direction"],"permission":"Create drafts; request approval before publishing or sending."},
+    {"id":"forge","name":"Forge","purpose":"Build code, apps, integrations, and reusable systems.","capabilities":["coding","prototyping","integration design"],"permission":"Make local changes; ask before external writes or deployment."},
+    {"id":"lens","name":"Lens","purpose":"Analyze files, data, and patterns, then explain what matters.","capabilities":["document analysis","data analysis"],"permission":"Read-only unless the user approves a resulting action."},
+    {"id":"pilot","name":"Pilot","purpose":"Coordinate approved tools, apps, plugins, and workflows.","capabilities":["tool orchestration","workflow execution"],"permission":"Explicit approval required for consequential or external actions."}
+  ]
+}
