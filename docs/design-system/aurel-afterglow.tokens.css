@@ -1,0 +1,62 @@
+/* Aurel Afterglow — optional design direction.
+   Source: user-provided docs.zip (2026-10-18).
+   Corrected source defect: neutral-200 contained an invalid spaced hex token.
+   This file is a proposal/reference; production globals.css is unchanged. */
+:root {
+  color-scheme: dark;
+  --aurel-neutral-50: #f6f4f1;
+  --aurel-neutral-100: #e5e2dd;
+  --aurel-neutral-200: #cfcbe5;
+  --aurel-neutral-300: #aba8a4;
+  --aurel-neutral-400: #85858b;
+  --aurel-neutral-500: #636671;
+  --aurel-neutral-600: #484c59;
+  --aurel-neutral-700: #333743;
+  --aurel-neutral-800: #20232d;
+  --aurel-neutral-900: #11131a;
+  --aurel-ink: #0b0c10;
+  --aurel-bg: var(--aurel-ink);
+  --aurel-surface: #151720;
+  --aurel-surface-raised: #1e222c;
+  --aurel-text: #f3eee5;
+  --aurel-text-muted: #b6b6be;
+  --aurel-border: #333743;
+  --aurel-accent-lime: #c9ff6b;
+  --aurel-accent-ember: #ff6a3d;
+  --aurel-accent-violet: #9b86ff;
+  --aurel-danger: #ff7373;
+  --aurel-on-accent: #0b0c10;
+  --aurel-focus: var(--aurel-accent-lime);
+  --aurel-font-display: "Space Grotesk", "Arial Black", system-ui, sans-serif;
+  --aurel-font-body: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --aurel-font-mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, monospace;
+  --aurel-weight-display: 800;
+  --aurel-weight-body: 450;
+  --aurel-weight-strong: 650;
+  --aurel-radius-sm: 8px;
+  --aurel-radius-md: 14px;
+  --aurel-radius-lg: 22px;
+  --aurel-radius-pill: 999px;
+  --aurel-space-1: 4px;
+  --aurel-space-2: 8px;
+  --aurel-space-3: 12px;
+  --aurel-space-4: 16px;
+  --aurel-space-6: 24px;
+  --aurel-space-8: 32px;
+  --aurel-space-12: 48px;
+  --aurel-space-16: 64px;
+  --aurel-duration-fast: 140ms;
+  --aurel-duration-standard: 220ms;
+  --aurel-duration-scene: 360ms;
+  --aurel-ease: cubic-bezier(0.2, 0.75, 0.25, 1);
+  --aurel-shadow-panel: 0 24px 80px rgb(0 0 0 / 0.38);
+  --aurel-glow-ember: 0 0 52px rgb(255 106 61 / 0.12);
+  --aurel-glow-lime: 0 0 36px rgb(201 255 107 / 0.13);
+}
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --aurel-duration-fast: 0ms;
+    --aurel-duration-standard: 0ms;
+    --aurel-duration-scene: 0ms;
+  }
+}
