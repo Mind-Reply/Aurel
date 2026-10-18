@@ -1,0 +1,39 @@
+name: Issuing Worker Validation
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'services/issuing-webhook/**'
+      - '.github/workflows/issuing-worker-validation.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'services/issuing-webhook/**'
+      - '.github/workflows/issuing-worker-validation.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+
+      - name: Install root dependencies
+        run: npm ci
+
+      - name: Install webhook service dependencies
+        run: npm install --prefix services/issuing-webhook --ignore-scripts
+
+      - name: Type-check webhook worker
+        run: npm run --prefix services/issuing-webhook check
+
+      - name: Build webhook container without publishing
+        run: docker build -f services/issuing-webhook/Dockerfile -t aurel-issuing-webhook:ci .
