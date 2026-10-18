@@ -1,0 +1,19 @@
+{
+  "name": "aurel-issuing-webhook",
+  "version": "1.0.0",
+  "private": true,
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "worker": "tsx worker.ts",
+    "check": "node --check index.js && tsc --noEmit --skipLibCheck --target ES2022 --module commonjs --moduleResolution node --esModuleInterop worker.ts"
+  },
+  "dependencies": {
+    "bullmq": "^5.34.10",
+    "express": "^4.21.2",
+    "pg": "^8.13.1",
+    "stripe": "^17.5.0",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2"
+  }
+}
