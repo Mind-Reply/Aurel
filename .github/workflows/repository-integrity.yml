@@ -1,39 +1,47 @@
 name: Repository Integrity Gate
+
 on:
   push:
     branches: ["**"]
   pull_request:
+
 permissions:
   contents: read
+
 jobs:
   integrity:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
+
       - name: Git whitespace check
         run: git diff --check
+
       - name: Reject tracked secret-bearing files
         shell: bash
         run: |
           set -euo pipefail
-          mapfile -d '' tracked_files < <(git ls-files -z)
           forbidden=()
-          for file in "${tracked_files[@]}"; do
+          while IFS= read -r -d '' file; do
             base="${file##*/}"
             case "$base" in
               .env.example|.env.template|.env.production.example|.env.development.example|.env.test.example|.env.sample)
+                # Explicitly documented templates are allowed; real env/key files are not.
                 # Example templates are allowed; real secret-bearing files are not.
                 continue
                 ;;
-              .env|.env.*|*.pem|*.key|credentials.json)
+              .env|.env.*|*.pem|*.p12|*.pfx|*.key|credentials.json)
                 forbidden+=("$file")
                 ;;
             esac
-          done
+          done < <(git ls-files -z)
+
           if (("${#forbidden[@]}" > 0)); then
             echo "::error::Potential secret-bearing files are tracked:"
             printf '%s\n' "${forbidden[@]}"
             exit 1
           fi
+
       - name: Repository gate result
         run: echo "PASS — repository integrity checks completed."
