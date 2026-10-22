@@ -28,6 +28,8 @@ jobs:
             case "$base" in
               .env.example|.env.template|.env.production.example|.env.development.example|.env.test.example|.env.sample)
                 # Explicitly documented templates are allowed; real env/key files are not.
+                # Example templates are allowed; real secret-bearing files are not.
+                continue
                 ;;
               .env|.env.*|*.pem|*.p12|*.pfx|*.key|credentials.json)
                 forbidden+=("$file")
