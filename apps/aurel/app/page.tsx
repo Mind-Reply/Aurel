@@ -37,26 +37,26 @@ export default function HousePage() {
             <span className="italic text-[#c9854a]">System.</span>
           </h1>
           <p className="mt-8 max-w-xl text-base md:text-lg font-light leading-relaxed text-[#8a7f72]">
-            Three doors into one house. Atmosphere first. Connectivity that never announces itself. Pathfinder, atelier, and private inquiry live.
+            Three doors into one house. Atmosphere first. Connectivity that never announces itself. Pathfinder, atelier, and private assessment live.
           </p>
           <div className="mt-12 flex flex-wrap gap-4">
             <Link
-              href="/system"
+              href="/system#engagement"
               className="border border-[#c9854a] bg-[#c9854a] px-7 py-3.5 text-[11px] uppercase tracking-[0.2em] text-[#090807] transition-colors duration-200 hover:bg-transparent hover:text-[#c9854a]"
+            >
+              Request Private Assessment
+            </Link>
+            <Link
+              href="/system"
+              className="border border-white/20 px-7 py-3.5 text-[11px] uppercase tracking-[0.2em] text-[#f3ece3] transition-colors duration-200 hover:border-[#c9854a] hover:text-[#c9854a]"
             >
               Enter System
             </Link>
             <Link
               href="/scent"
-              className="border border-white/20 px-7 py-3.5 text-[11px] uppercase tracking-[0.2em] text-[#f3ece3] transition-colors duration-200 hover:border-[#c9854a] hover:text-[#c9854a]"
-            >
-              Compose Scent
-            </Link>
-            <Link
-              href="/system#pathfinder"
               className="border border-white/10 px-7 py-3.5 text-[11px] uppercase tracking-[0.2em] text-[#8a7f72] transition-colors duration-200 hover:border-white/30 hover:text-[#f3ece3]"
             >
-              Pathfinder
+              Compose Scent
             </Link>
           </div>
         </div>
@@ -102,9 +102,9 @@ export default function HousePage() {
             <p className="mt-1 text-sm text-[#8a7f72]">Seat · need · scale → concrete product + inquiry.</p>
           </div>
           <div>
-            <p className="text-[10px] uppercase tracking-[0.2em] text-[#c9854a] mb-2">Inquiry</p>
-            <p className="font-display text-xl text-[#f3ece3]">Private commission</p>
-            <p className="mt-1 text-sm text-[#8a7f72]">Receipt returned instantly. Team reviews from logs.</p>
+            <p className="text-[10px] uppercase tracking-[0.2em] text-[#c9854a] mb-2">Assessment</p>
+            <p className="font-display text-xl text-[#f3ece3]">Private Blueprint</p>
+            <p className="mt-1 text-sm text-[#8a7f72]">48h response · 10-day delivery · receipt on submit.</p>
           </div>
         </div>
       </section>
@@ -121,10 +121,10 @@ export default function HousePage() {
             Every room, every device, every moment — calm, stable, seamless. Connectivity engineered so the architecture remains the hero.
           </p>
           <Link
-            href="/system"
+            href="/system#engagement"
             className="mt-10 inline-block border border-[#c9854a] px-8 py-3.5 text-[11px] uppercase tracking-[0.2em] text-[#c9854a] transition-colors duration-200 hover:bg-[#c9854a] hover:text-[#090807]"
           >
-            Open System
+            Request Private Assessment
           </Link>
         </div>
       </section>
