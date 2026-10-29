@@ -60,6 +60,7 @@ export type AgentTemplate = {
   focus: string;
   status: AgentStatus;
   notes?: string;
+  points: string[];
 };
 
 export type ActivityTemplate = {
@@ -133,6 +134,7 @@ export const COMPUTER_TEMPLATES: ComputerTemplate[] = [
   },
 ];
 
+/** Agent modes as selectable options */
 export const AGENT_TEMPLATES: AgentTemplate[] = [
   {
     id: 'ag-multi',
@@ -142,6 +144,11 @@ export const AGENT_TEMPLATES: AgentTemplate[] = [
     focus: 'Hardest questions · sub-problems in parallel · merged cited answer',
     status: 'idle',
     notes: 'Each agent shows work · auditable reasoning',
+    points: [
+      'Parallel agents tackle sub-problems simultaneously',
+      'Each agent’s reasoning is transparent and auditable',
+      'Results merge into one coherent, cited answer',
+    ],
   },
   {
     id: 'ag-search',
@@ -151,6 +158,11 @@ export const AGENT_TEMPLATES: AgentTemplate[] = [
     focus: 'Web + 𝕏 live · primary sources · real-time trends',
     status: 'idle',
     notes: 'Not last year’s training data',
+    points: [
+      'Live citations from primary sources across the web',
+      'Real-time 𝕏 integration for breaking news and trends',
+      'Follow-up questions drill deeper into any topic',
+    ],
   },
   {
     id: 'ag-imagine',
@@ -160,6 +172,11 @@ export const AGENT_TEMPLATES: AgentTemplate[] = [
     focus: 'Text-to-image · text-to-video · restyle and iterate',
     status: 'idle',
     notes: 'Up to 2K · short video in-thread',
+    points: [
+      'Text-to-image and text-to-video in one thread',
+      'Edit generated content with follow-up prompts',
+      'Up to 2K resolution and short-form video',
+    ],
   },
   {
     id: 'ag-code',
@@ -168,6 +185,11 @@ export const AGENT_TEMPLATES: AgentTemplate[] = [
     mode: 'code',
     focus: 'Write · debug · explain in any language',
     status: 'idle',
+    points: [
+      'Write, debug, and explain code in any language',
+      'Production-ready patterns and reviews',
+      'Inline fixes with clear rationale',
+    ],
   },
   {
     id: 'ag-vision',
@@ -176,6 +198,11 @@ export const AGENT_TEMPLATES: AgentTemplate[] = [
     mode: 'vision',
     focus: 'Screenshots · photos · diagrams',
     status: 'idle',
+    points: [
+      'Analyze screenshots, photos, and diagrams',
+      'Extract structure and text from images',
+      'Support design and site review workflows',
+    ],
   },
   {
     id: 'ag-voice',
@@ -184,6 +211,11 @@ export const AGENT_TEMPLATES: AgentTemplate[] = [
     mode: 'voice',
     focus: 'Natural back-and-forth · low latency',
     status: 'idle',
+    points: [
+      'Natural conversation with low latency',
+      'Hands-free operator control',
+      'Sync with written activity log',
+    ],
   },
   {
     id: 'ag-file',
@@ -192,6 +224,11 @@ export const AGENT_TEMPLATES: AgentTemplate[] = [
     mode: 'files',
     focus: 'Upload · summarize · extract',
     status: 'idle',
+    points: [
+      'Upload documents and get instant summaries',
+      'Extract tables, clauses, and key facts',
+      'Ground answers in the file contents',
+    ],
   },
   {
     id: 'ag-reason',
@@ -200,6 +237,11 @@ export const AGENT_TEMPLATES: AgentTemplate[] = [
     mode: 'reason',
     focus: 'Step-by-step thinking · verifiable chain',
     status: 'idle',
+    points: [
+      'Step-by-step thinking you can follow and verify',
+      'Hard-problem decomposition',
+      'Evidence-linked conclusions',
+    ],
   },
 ];
 
