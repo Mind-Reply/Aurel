@@ -11,15 +11,21 @@ export default function SystemPage() {
   const [scale, setScale] = useState<Scale>('single');
   const [show, setShow] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
+  const [prefillLane, setPrefillLane] = useState<string | undefined>();
 
   const rec = show ? recommend(seat, need, scale) : null;
+
+  const openInquiry = (lane?: string) => {
+    setPrefillLane(lane);
+    setModalOpen(true);
+  };
 
   return (
     <Shell>
       {/* Connectivity hero — prior language kept */}
       <section className="px-6 pt-12 pb-20 md:px-8 border-b border-white/5">
         <div className="mx-auto max-w-6xl">
-          <p className="text-[10px] uppercase tracking-[0.3em] text-[#c9854a] mb-3">System</p>
+          <p className="text-[10px] uppercase tracking-[0.3em] text-[#c9854a] mb-3">System · Active Platform</p>
           <h1 className="font-display text-4xl md:text-6xl font-light leading-tight text-[#f3ece3] max-w-3xl text-balance">
             We do not sell routers.<br />
             <span className="italic text-[#c9854a]">We design confidence.</span>
@@ -30,7 +36,7 @@ export default function SystemPage() {
           <div className="mt-10 flex flex-wrap gap-4">
             <button
               type="button"
-              onClick={() => setModalOpen(true)}
+              onClick={() => openInquiry()}
               className="border border-[#c9854a] bg-[#c9854a] px-7 py-3.5 text-[11px] uppercase tracking-[0.2em] text-[#090807] transition-colors duration-200 hover:bg-transparent hover:text-[#c9854a]"
             >
               Begin Private Inquiry
@@ -94,6 +100,13 @@ export default function SystemPage() {
                 <li>• Multi-WAN failover planning</li>
                 <li>• Segmented connected devices</li>
               </ul>
+              <button
+                type="button"
+                onClick={() => openInquiry('Architectural Residences')}
+                className="mt-6 self-start text-[11px] uppercase tracking-[0.15em] text-[#c9854a] hover:underline"
+              >
+                Inquire this portfolio →
+              </button>
             </article>
             <article className="flex flex-col justify-between border border-white/8 bg-[#161310]/60 p-8 md:p-10">
               <div>
@@ -108,6 +121,13 @@ export default function SystemPage() {
                 <li>• Segregated guest access</li>
                 <li>• Remote health monitoring options</li>
               </ul>
+              <button
+                type="button"
+                onClick={() => openInquiry('Private Hospitality & Villas')}
+                className="mt-6 self-start text-[11px] uppercase tracking-[0.15em] text-[#c9854a] hover:underline"
+              >
+                Inquire this portfolio →
+              </button>
             </article>
           </div>
         </div>
@@ -189,7 +209,7 @@ export default function SystemPage() {
               <p className="text-sm font-light text-[#8a7f72] leading-relaxed mb-6">{rec.why}</p>
               <button
                 type="button"
-                onClick={() => setModalOpen(true)}
+                onClick={() => openInquiry(rec.product)}
                 className="border border-[#c9854a] bg-[#c9854a] px-6 py-3 text-[11px] uppercase tracking-[0.18em] text-[#090807] transition-colors duration-200 hover:bg-transparent hover:text-[#c9854a]"
               >
                 Start this lane — Private Inquiry
@@ -239,7 +259,7 @@ export default function SystemPage() {
           </div>
           <button
             type="button"
-            onClick={() => setModalOpen(true)}
+            onClick={() => openInquiry('Telemetry Assurance')}
             className="shrink-0 border border-[#c9854a] bg-[#c9854a] px-8 py-3.5 text-[11px] uppercase tracking-[0.2em] text-[#090807] transition-colors duration-200 hover:bg-transparent hover:text-[#c9854a]"
           >
             Commission Assessment
@@ -247,7 +267,11 @@ export default function SystemPage() {
         </div>
       </section>
 
-      <InquiryModal isOpen={modalOpen} onClose={() => setModalOpen(false)} />
+      <InquiryModal
+        isOpen={modalOpen}
+        onClose={() => setModalOpen(false)}
+        prefillLane={prefillLane}
+      />
     </Shell>
   );
 }
