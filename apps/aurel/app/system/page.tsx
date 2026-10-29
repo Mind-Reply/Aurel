@@ -5,6 +5,39 @@ import { Shell } from '../../components/Shell';
 import { divisions, products, recommend, type Seat, type Need, type Scale } from '../../lib/house';
 import { InquiryModal } from '../../components/InquiryModal';
 
+const processStages = [
+  {
+    n: '01',
+    title: 'Inquiry',
+    owner: 'Client',
+    desc: 'Submit scope and location. Receipt issued instantly. Team responds within 48 hours.',
+  },
+  {
+    n: '02',
+    title: 'Private Blueprint',
+    owner: 'AUREL',
+    desc: 'Questionnaire, material and layout review, priority room map, problem-zone analysis, guest-access logic, single upgrade path. Delivered in 10 business days.',
+  },
+  {
+    n: '03',
+    title: 'Design Acceptance',
+    owner: 'Client',
+    desc: 'Blueprint reviewed. Scope, timeline and investment confirmed. Install phase begins only after written acceptance.',
+  },
+  {
+    n: '04',
+    title: 'Invisible Install',
+    owner: 'AUREL + partners',
+    desc: 'Discreet access points integrated into architecture. Coverage validated against the blueprint. Minimal disruption.',
+  },
+  {
+    n: '05',
+    title: 'Telemetry Assurance',
+    owner: 'AUREL',
+    desc: 'Ongoing health monitoring, failover verification, and operational records. Network remains invisible and reliable.',
+  },
+];
+
 export default function SystemPage() {
   const [seat, setSeat] = useState<Seat>('owner');
   const [need, setNeed] = useState<Need>('calm');
@@ -22,7 +55,7 @@ export default function SystemPage() {
 
   return (
     <Shell>
-      {/* Hero */}
+      {/* Hero — primary commercial CTA first */}
       <section className="px-6 pt-12 pb-20 md:px-8 border-b border-white/5">
         <div className="mx-auto max-w-6xl">
           <p className="text-[10px] uppercase tracking-[0.3em] text-[#c9854a] mb-3">System · Active Platform</p>
@@ -34,27 +67,27 @@ export default function SystemPage() {
             Every room, every device, every moment — calm, stable, seamless connectivity engineered for high-consequence architectural estates.
           </p>
           <p className="mt-5 text-[11px] uppercase tracking-[0.18em] text-[#5c564e]">
-            Currently accepting a limited number of new commissions.
+            Response within 48 hours · Limited new commissions
           </p>
           <div className="mt-10 flex flex-wrap gap-4">
             <button
               type="button"
-              onClick={() => openInquiry()}
+              onClick={() => openInquiry('Private Blueprint')}
               className="border border-[#c9854a] bg-[#c9854a] px-7 py-3.5 text-[11px] uppercase tracking-[0.2em] text-[#090807] transition-colors duration-200 hover:bg-transparent hover:text-[#c9854a]"
             >
-              Begin Private Inquiry
+              Request Private Assessment
             </button>
             <a
-              href="#pathfinder"
+              href="#process"
               className="border border-white/20 px-7 py-3.5 text-[11px] uppercase tracking-[0.2em] text-[#f3ece3] transition-colors duration-200 hover:border-[#c9854a] hover:text-[#c9854a]"
             >
-              Pathfinder
+              How it works
             </a>
             <a
-              href="#engagement"
+              href="#pathfinder"
               className="border border-white/10 px-7 py-3.5 text-[11px] uppercase tracking-[0.2em] text-[#8a7f72] transition-colors duration-200 hover:border-white/30 hover:text-[#f3ece3]"
             >
-              Engagement Model
+              Pathfinder
             </a>
           </div>
         </div>
@@ -88,13 +121,41 @@ export default function SystemPage() {
         </div>
       </section>
 
-      {/* Evidence — Selected Work */}
+      {/* Resilience & Risk */}
       <section className="px-6 py-20 md:px-8 border-b border-white/5 bg-[#0c0b0a]">
+        <div className="mx-auto max-w-6xl">
+          <div className="mb-12 max-w-xl">
+            <span className="mb-3 block text-[11px] uppercase tracking-[0.25em] text-[#8a7f72]">Resilience</span>
+            <h2 className="font-display text-3xl font-light text-[#f3ece3]">What happens when the primary path fails.</h2>
+            <p className="mt-3 text-sm font-light text-[#8a7f72]">High-consequence environments require explicit failure design, not hope.</p>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="border border-white/8 bg-[#161310]/60 p-7">
+              <p className="text-[10px] uppercase tracking-[0.2em] text-[#c9854a] mb-3">Failover</p>
+              <h3 className="font-display text-xl text-[#f3ece3] mb-3">Multi-WAN</h3>
+              <p className="text-sm font-light leading-relaxed text-[#8a7f72]">Primary and secondary paths planned from day one. Automatic switch when the main circuit degrades. No manual intervention required for the household.</p>
+            </div>
+            <div className="border border-white/8 bg-[#161310]/60 p-7">
+              <p className="text-[10px] uppercase tracking-[0.2em] text-[#c9854a] mb-3">Segmentation</p>
+              <h3 className="font-display text-xl text-[#f3ece3] mb-3">Guest vs private</h3>
+              <p className="text-sm font-light leading-relaxed text-[#8a7f72]">Guest traffic isolated from owner and staff networks. IoT and media devices placed on controlled segments so a compromised camera cannot reach the office.</p>
+            </div>
+            <div className="border border-white/8 bg-[#161310]/60 p-7">
+              <p className="text-[10px] uppercase tracking-[0.2em] text-[#c9854a] mb-3">Visibility</p>
+              <h3 className="font-display text-xl text-[#f3ece3] mb-3">Telemetry</h3>
+              <p className="text-sm font-light leading-relaxed text-[#8a7f72]">Health signals, coverage drift and outage events recorded. Optional remote monitoring so issues are known before they become visible to the household.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Evidence — Selected Work */}
+      <section className="px-6 py-20 md:px-8 border-b border-white/5">
         <div className="mx-auto max-w-6xl">
           <div className="mb-12 max-w-xl">
             <span className="mb-3 block text-[11px] uppercase tracking-[0.25em] text-[#8a7f72]">Selected Work</span>
             <h2 className="font-display text-3xl font-light text-[#f3ece3]">Evidence, not claims.</h2>
-            <p className="mt-3 text-sm font-light text-[#8a7f72]">Anonymised outcomes from recent commissions. Full case material available under NDA.</p>
+            <p className="mt-3 text-sm font-light text-[#8a7f72]">Anonymised outcome from a recent commission. Full case material available under NDA.</p>
           </div>
           <article className="border border-white/8 bg-[#161310]/60 p-8 md:p-10">
             <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-6">
@@ -135,31 +196,79 @@ export default function SystemPage() {
         </div>
       </section>
 
-      {/* Engagement Model */}
+      {/* Process — 5 stages with ownership */}
+      <section id="process" className="px-6 py-20 md:px-8 border-b border-white/5 bg-[#0c0b0a]">
+        <div className="mx-auto max-w-6xl">
+          <div className="mb-14 max-w-xl">
+            <span className="mb-3 block text-[11px] uppercase tracking-[0.25em] text-[#8a7f72]">Process</span>
+            <h2 className="font-display text-3xl font-light text-[#f3ece3]">Five stages. Clear ownership.</h2>
+            <p className="mt-3 text-sm font-light text-[#8a7f72]">No ambiguity about who does what, or when the next decision is required.</p>
+          </div>
+          <div className="space-y-0">
+            {processStages.map((s, i) => (
+              <div
+                key={s.n}
+                className={`grid grid-cols-1 md:grid-cols-12 gap-4 md:gap-8 py-8 ${
+                  i < processStages.length - 1 ? 'border-b border-white/5' : ''
+                }`}
+              >
+                <div className="md:col-span-1">
+                  <span className="font-display text-2xl text-[#c9854a]">{s.n}</span>
+                </div>
+                <div className="md:col-span-3">
+                  <h3 className="font-display text-xl text-[#f3ece3]">{s.title}</h3>
+                  <p className="mt-1 text-[10px] uppercase tracking-[0.15em] text-[#5c564e]">Owner · {s.owner}</p>
+                </div>
+                <div className="md:col-span-8">
+                  <p className="text-sm font-light leading-relaxed text-[#8a7f72]">{s.desc}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Assessment deliverable preview + primary CTA */}
       <section id="engagement" className="px-6 py-20 md:px-8 border-b border-white/5">
         <div className="mx-auto max-w-6xl">
           <div className="mb-12 max-w-xl">
-            <span className="mb-3 block text-[11px] uppercase tracking-[0.25em] text-[#8a7f72]">Engagement Model</span>
-            <h2 className="font-display text-3xl font-light text-[#f3ece3]">One clear first step.</h2>
+            <span className="mb-3 block text-[11px] uppercase tracking-[0.25em] text-[#8a7f72]">Private Blueprint</span>
+            <h2 className="font-display text-3xl font-light text-[#f3ece3]">What you receive.</h2>
           </div>
-          <div className="border border-[#c9854a]/25 bg-[#c9854a]/5 p-8 md:p-10 max-w-3xl">
-            <p className="text-[10px] uppercase tracking-[0.2em] text-[#c9854a] mb-2">Private Blueprint</p>
-            <h3 className="font-display text-2xl md:text-3xl text-[#f3ece3] mb-4">Fixed scope · 10-day delivery</h3>
-            <p className="text-sm font-light leading-relaxed text-[#8a7f72] mb-6 max-w-xl">
-              Site questionnaire, material and layout review, priority room map, problem-zone analysis, guest-access logic, and a single upgrade path. Delivered as a private document. No obligation beyond the blueprint fee.
-            </p>
-            <ul className="space-y-2 text-sm text-[#8a7f72] mb-8">
-              <li className="flex gap-3"><span className="text-[#c9854a]">—</span> Response within 48 hours of inquiry</li>
-              <li className="flex gap-3"><span className="text-[#c9854a]">—</span> Blueprint within 10 business days of intake complete</li>
-              <li className="flex gap-3"><span className="text-[#c9854a]">—</span> Install and assurance phases scoped only after blueprint acceptance</li>
-            </ul>
-            <button
-              type="button"
-              onClick={() => openInquiry('Private Blueprint')}
-              className="border border-[#c9854a] bg-[#c9854a] px-7 py-3.5 text-[11px] uppercase tracking-[0.2em] text-[#090807] transition-colors duration-200 hover:bg-transparent hover:text-[#c9854a]"
-            >
-              Commission Private Blueprint
-            </button>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-start">
+            <div className="border border-[#c9854a]/25 bg-[#c9854a]/5 p-8 md:p-10">
+              <p className="text-[10px] uppercase tracking-[0.2em] text-[#c9854a] mb-2">Fixed scope · 10-day delivery</p>
+              <h3 className="font-display text-2xl text-[#f3ece3] mb-6">Assessment deliverables</h3>
+              <ul className="space-y-3 text-sm font-light text-[#8a7f72]">
+                <li className="flex gap-3"><span className="text-[#c9854a] shrink-0">01</span> Room priority matrix — which spaces matter most</li>
+                <li className="flex gap-3"><span className="text-[#c9854a] shrink-0">02</span> Problem-zone map — where coverage currently fails</li>
+                <li className="flex gap-3"><span className="text-[#c9854a] shrink-0">03</span> Guest segmentation logic — private vs visitor traffic</li>
+                <li className="flex gap-3"><span className="text-[#c9854a] shrink-0">04</span> Material and layout constraints noted</li>
+                <li className="flex gap-3"><span className="text-[#c9854a] shrink-0">05</span> Single clear upgrade path with decision points</li>
+              </ul>
+              <p className="mt-8 text-[11px] uppercase tracking-[0.15em] text-[#5c564e]">
+                No obligation beyond the blueprint fee. Install scoped only after acceptance.
+              </p>
+            </div>
+            <div className="flex flex-col justify-center gap-6">
+              <div>
+                <p className="text-[10px] uppercase tracking-[0.2em] text-[#8a7f72] mb-2">Timeline</p>
+                <p className="font-display text-xl text-[#f3ece3]">48h response · 10 business days delivery</p>
+              </div>
+              <div>
+                <p className="text-[10px] uppercase tracking-[0.2em] text-[#8a7f72] mb-2">Next step</p>
+                <p className="text-sm font-light text-[#8a7f72] leading-relaxed max-w-sm">
+                  Submit the private inquiry. You receive a receipt immediately. The team contacts you within two business days to confirm intake and begin the blueprint.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => openInquiry('Private Blueprint')}
+                className="self-start border border-[#c9854a] bg-[#c9854a] px-8 py-4 text-[11px] uppercase tracking-[0.2em] text-[#090807] transition-colors duration-200 hover:bg-transparent hover:text-[#c9854a]"
+              >
+                Request Private Assessment
+              </button>
+            </div>
           </div>
         </div>
       </section>
@@ -218,7 +327,7 @@ export default function SystemPage() {
         </div>
       </section>
 
-      {/* Pathfinder */}
+      {/* Pathfinder — soft entry */}
       <section id="pathfinder" className="px-6 py-20 md:px-8 border-b border-white/5">
         <div className="mx-auto max-w-6xl">
           <p className="text-[10px] uppercase tracking-[0.25em] text-[#8a7f72] mb-3">Pathfinder</p>
@@ -304,7 +413,7 @@ export default function SystemPage() {
         </div>
       </section>
 
-      {/* Products + Divisions + Telemetry */}
+      {/* Products + Divisions + final CTA */}
       <section className="border-t border-white/5 px-6 py-20 md:px-8">
         <div className="mx-auto max-w-6xl grid grid-cols-1 lg:grid-cols-2 gap-16 mb-16">
           <div>
@@ -338,16 +447,18 @@ export default function SystemPage() {
 
         <div className="mx-auto max-w-6xl flex flex-col md:flex-row md:items-center justify-between gap-8 border border-white/8 bg-[#161310]/50 p-8 md:p-10">
           <div>
-            <span className="mb-2 block text-[10px] uppercase tracking-[0.25em] text-[#c9854a]">Auditable Telemetry</span>
-            <h3 className="font-display text-2xl text-[#f3ece3]">Operational records and network assurance.</h3>
-            <p className="mt-2 text-sm font-light text-[#8a7f72] max-w-md">Commission an assessment. Receive a private blueprint with room priority, problem zones, guest access logic and a clear upgrade path.</p>
+            <span className="mb-2 block text-[10px] uppercase tracking-[0.25em] text-[#c9854a]">Ready when you are</span>
+            <h3 className="font-display text-2xl text-[#f3ece3]">Request a private assessment.</h3>
+            <p className="mt-2 text-sm font-light text-[#8a7f72] max-w-md">
+              Receipt issued immediately. Team response within 48 hours. Blueprint in 10 business days.
+            </p>
           </div>
           <button
             type="button"
-            onClick={() => openInquiry('Telemetry Assurance')}
+            onClick={() => openInquiry('Private Blueprint')}
             className="shrink-0 border border-[#c9854a] bg-[#c9854a] px-8 py-3.5 text-[11px] uppercase tracking-[0.2em] text-[#090807] transition-colors duration-200 hover:bg-transparent hover:text-[#c9854a]"
           >
-            Commission Assessment
+            Request Private Assessment
           </button>
         </div>
       </section>
