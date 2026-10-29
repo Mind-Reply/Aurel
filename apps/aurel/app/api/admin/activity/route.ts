@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { SEED_ACTIVITY, makeId, type Activity, type ActivityKind } from '../../../lib/admin';
+import { SEED_ACTIVITY, makeId, type Activity, type ActivityKind } from '@/lib/admin';
 
 let cache: Activity[] = [...SEED_ACTIVITY];
 

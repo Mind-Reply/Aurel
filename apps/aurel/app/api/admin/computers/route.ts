@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { SEED_COMPUTERS, makeId, type Computer, type ComputerStatus } from '../../../lib/admin';
+import { SEED_COMPUTERS, makeId, type Computer, type ComputerStatus } from '@/lib/admin';
 
 // Serverless-friendly: returns seed + accepts POST for logging.
 // Primary persistence is client localStorage (owner admin). Server keeps a soft cache for the request lifetime.
