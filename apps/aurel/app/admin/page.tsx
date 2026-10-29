@@ -4,21 +4,28 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import {
   SEED_COMPUTERS,
+  SEED_AGENTS,
   SEED_ACTIVITY,
   COMPUTER_TEMPLATES,
+  AGENT_TEMPLATES,
   ACTIVITY_TEMPLATES,
   KIND_LABEL,
   STATUS_COLOR,
+  AGENT_STATUS_COLOR,
   makeId,
   type Computer,
   type ComputerStatus,
   type ComputerTemplate,
+  type Agent,
+  type AgentStatus,
+  type AgentTemplate,
   type Activity,
   type ActivityKind,
   type ActivityTemplate,
 } from '../../lib/admin';
 
 const STORAGE_PC = 'aurel-admin-computers';
+const STORAGE_AG = 'aurel-admin-agents';
 const STORAGE_ACT = 'aurel-admin-activity';
 const STORAGE_GATE = 'aurel-admin-unlocked';
 
@@ -54,8 +61,10 @@ export default function AdminPage() {
   const [unlocked, setUnlocked] = useState(false);
   const [code, setCode] = useState('');
   const [computers, setComputers] = useState<Computer[]>(SEED_COMPUTERS);
+  const [agents, setAgents] = useState<Agent[]>(SEED_AGENTS);
   const [activities, setActivities] = useState<Activity[]>(SEED_ACTIVITY);
   const [filter, setFilter] = useState<ActivityKind | 'all'>('all');
+  const [tab, setTab] = useState<'computers' | 'agents'>('agents');
 
   const [name, setName] = useState('');
   const [role, setRole] = useState('');
@@ -65,6 +74,12 @@ export default function AdminPage() {
   const [adding, setAdding] = useState(false);
   const [msg, setMsg] = useState<string | null>(null);
 
+  const [agName, setAgName] = useState('');
+  const [agMode, setAgMode] = useState('');
+  const [agFocus, setAgFocus] = useState('');
+  const [agStatus, setAgStatus] = useState<AgentStatus>('idle');
+  const [agNotes, setAgNotes] = useState('');
+
   const [actTitle, setActTitle] = useState('');
   const [actKind, setActKind] = useState<ActivityKind>('manual');
   const [actDetail, setActDetail] = useState('');
@@ -72,12 +87,18 @@ export default function AdminPage() {
   useEffect(() => {
     setUnlocked(localStorage.getItem(STORAGE_GATE) === '1');
     setComputers(loadJSON(STORAGE_PC, SEED_COMPUTERS));
+    setAgents(loadJSON(STORAGE_AG, SEED_AGENTS));
     setActivities(loadJSON(STORAGE_ACT, SEED_ACTIVITY));
   }, []);
 
   const persistPc = useCallback((list: Computer[]) => {
     setComputers(list);
     saveJSON(STORAGE_PC, list);
+  }, []);
+
+  const persistAg = useCallback((list: Agent[]) => {
+    setAgents(list);
+    saveJSON(STORAGE_AG, list);
   }, []);
 
   const persistAct = useCallback((list: Activity[]) => {
@@ -110,6 +131,14 @@ export default function AdminPage() {
     setNotes(tpl.notes || '');
   };
 
+  const applyAgentTemplate = (tpl: AgentTemplate) => {
+    setAgName(tpl.name);
+    setAgMode(tpl.mode);
+    setAgFocus(tpl.focus);
+    setAgStatus(tpl.status);
+    setAgNotes(tpl.notes || '');
+  };
+
   const applyActivityTemplate = (tpl: ActivityTemplate) => {
     setActKind(tpl.kind);
     setActTitle(tpl.title);
@@ -132,18 +161,18 @@ export default function AdminPage() {
       notes: notes.trim() || undefined,
     };
 
-    const next = [computer, ...computers];
-    persistPc(next);
-
-    const activity: Activity = {
-      id: makeId('act'),
-      kind: 'computer',
-      title: `Added ${computer.name}`,
-      detail: computer.role,
-      computerId: computer.id,
-      at: new Date().toISOString(),
-    };
-    persistAct([activity, ...activities]);
+    persistPc([computer, ...computers]);
+    persistAct([
+      {
+        id: makeId('act'),
+        kind: 'computer',
+        title: `Added ${computer.name}`,
+        detail: computer.role,
+        computerId: computer.id,
+        at: new Date().toISOString(),
+      },
+      ...activities,
+    ]);
 
     try {
       await fetch('/api/admin/computers', {
@@ -163,7 +192,7 @@ export default function AdminPage() {
     setTimeout(() => setMsg(null), 2000);
   };
 
-  const addFromTemplate = async (tpl: ComputerTemplate) => {
+  const addFromComputerTemplate = async (tpl: ComputerTemplate) => {
     setAdding(true);
     const computer: Computer = {
       id: makeId('pc'),
@@ -186,16 +215,129 @@ export default function AdminPage() {
       },
       ...activities,
     ]);
-    try {
-      await fetch('/api/admin/computers', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(computer),
-      });
-    } catch {}
     setAdding(false);
     setMsg(`${tpl.label} added`);
     setTimeout(() => setMsg(null), 2000);
+  };
+
+  const addAgent = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!agName.trim()) return;
+    setAdding(true);
+
+    const agent: Agent = {
+      id: makeId('ag'),
+      name: agName.trim(),
+      mode: agMode.trim() || 'custom',
+      focus: agFocus.trim() || '—',
+      status: agStatus,
+      lastRun: new Date().toISOString(),
+      notes: agNotes.trim() || undefined,
+    };
+
+    persistAg([agent, ...agents]);
+    persistAct([
+      {
+        id: makeId('act'),
+        kind: 'agent',
+        title: `Agent registered · ${agent.name}`,
+        detail: agent.mode,
+        agentId: agent.id,
+        at: new Date().toISOString(),
+      },
+      ...activities,
+    ]);
+
+    setAgName('');
+    setAgMode('');
+    setAgFocus('');
+    setAgNotes('');
+    setAgStatus('idle');
+    setAdding(false);
+    setMsg('Agent added');
+    setTimeout(() => setMsg(null), 2000);
+  };
+
+  const addFromAgentTemplate = async (tpl: AgentTemplate) => {
+    setAdding(true);
+    const agent: Agent = {
+      id: makeId('ag'),
+      name: tpl.name,
+      mode: tpl.mode,
+      focus: tpl.focus,
+      status: tpl.status,
+      lastRun: new Date().toISOString(),
+      notes: tpl.notes,
+    };
+    persistAg([agent, ...agents]);
+    persistAct([
+      {
+        id: makeId('act'),
+        kind: 'agent',
+        title: `Agent · ${tpl.label}`,
+        detail: tpl.focus.slice(0, 80),
+        agentId: agent.id,
+        at: new Date().toISOString(),
+      },
+      ...activities,
+    ]);
+    setAdding(false);
+    setMsg(`${tpl.label} agent ready`);
+    setTimeout(() => setMsg(null), 2000);
+  };
+
+  const setAgentStatus = (id: string, next: AgentStatus) => {
+    const list = agents.map((a) =>
+      a.id === id ? { ...a, status: next, lastRun: new Date().toISOString() } : a
+    );
+    persistAg(list);
+    const ag = list.find((a) => a.id === id);
+    if (ag) {
+      persistAct([
+        {
+          id: makeId('act'),
+          kind: 'agent',
+          title: `${ag.name} → ${next}`,
+          agentId: id,
+          at: new Date().toISOString(),
+        },
+        ...activities,
+      ]);
+    }
+  };
+
+  const removeAgent = (id: string) => {
+    const ag = agents.find((a) => a.id === id);
+    persistAg(agents.filter((a) => a.id !== id));
+    if (ag) {
+      persistAct([
+        {
+          id: makeId('act'),
+          kind: 'agent',
+          title: `Removed agent · ${ag.name}`,
+          at: new Date().toISOString(),
+        },
+        ...activities,
+      ]);
+    }
+  };
+
+  const runAgent = (id: string) => {
+    setAgentStatus(id, 'running');
+    const ag = agents.find((a) => a.id === id);
+    if (ag) {
+      persistAct([
+        {
+          id: makeId('act'),
+          kind: 'agent',
+          title: `Run · ${ag.name}`,
+          detail: ag.focus.slice(0, 100),
+          agentId: id,
+          at: new Date().toISOString(),
+        },
+        ...activities,
+      ]);
+    }
   };
 
   const logActivity = async (e?: React.FormEvent) => {
@@ -232,13 +374,6 @@ export default function AdminPage() {
       at: new Date().toISOString(),
     };
     persistAct([activity, ...activities]);
-    try {
-      await fetch('/api/admin/activity', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(activity),
-      });
-    } catch {}
     setMsg(`Logged · ${tpl.label}`);
     setTimeout(() => setMsg(null), 1500);
   };
@@ -285,6 +420,7 @@ export default function AdminPage() {
   }, [activities, filter]);
 
   const onlineCount = computers.filter((c) => c.status === 'online').length;
+  const runningAgents = agents.filter((a) => a.status === 'running').length;
 
   if (!unlocked) {
     return (
@@ -327,7 +463,7 @@ export default function AdminPage() {
           </div>
           <div className="flex items-center gap-4">
             <span className="text-[11px] text-[#8a7f72]">
-              {onlineCount}/{computers.length} online
+              {runningAgents} agents · {onlineCount}/{computers.length} nodes
             </span>
             <button
               type="button"
@@ -343,16 +479,16 @@ export default function AdminPage() {
       <main className="mx-auto max-w-6xl px-6 py-10 space-y-12">
         <section className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <div className="border border-white/8 bg-[#161310]/60 p-5">
+            <p className="text-[10px] uppercase tracking-[0.2em] text-[#5c564e]">Agents</p>
+            <p className="font-display text-3xl text-[#f3ece3] mt-1">{agents.length}</p>
+          </div>
+          <div className="border border-white/8 bg-[#161310]/60 p-5">
+            <p className="text-[10px] uppercase tracking-[0.2em] text-[#5c564e]">Running</p>
+            <p className="font-display text-3xl text-emerald-400 mt-1">{runningAgents}</p>
+          </div>
+          <div className="border border-white/8 bg-[#161310]/60 p-5">
             <p className="text-[10px] uppercase tracking-[0.2em] text-[#5c564e]">Computers</p>
             <p className="font-display text-3xl text-[#f3ece3] mt-1">{computers.length}</p>
-          </div>
-          <div className="border border-white/8 bg-[#161310]/60 p-5">
-            <p className="text-[10px] uppercase tracking-[0.2em] text-[#5c564e]">Online</p>
-            <p className="font-display text-3xl text-emerald-400 mt-1">{onlineCount}</p>
-          </div>
-          <div className="border border-white/8 bg-[#161310]/60 p-5">
-            <p className="text-[10px] uppercase tracking-[0.2em] text-[#5c564e]">Activities</p>
-            <p className="font-display text-3xl text-[#f3ece3] mt-1">{activities.length}</p>
           </div>
           <div className="border border-white/8 bg-[#161310]/60 p-5">
             <p className="text-[10px] uppercase tracking-[0.2em] text-[#5c564e]">Last event</p>
@@ -370,123 +506,270 @@ export default function AdminPage() {
 
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-10">
           <section className="lg:col-span-2 space-y-6">
-            <div>
-              <p className="text-[10px] uppercase tracking-[0.25em] text-[#8a7f72] mb-3">Computers</p>
-              <h2 className="font-display text-2xl font-light text-[#f3ece3]">Fleet</h2>
+            {/* Tab switch */}
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={() => setTab('agents')}
+                className={`text-[11px] uppercase tracking-[0.15em] px-3 py-1.5 border ${
+                  tab === 'agents'
+                    ? 'border-[#c9854a] text-[#c9854a]'
+                    : 'border-white/10 text-[#5c564e]'
+                }`}
+              >
+                Agents
+              </button>
+              <button
+                type="button"
+                onClick={() => setTab('computers')}
+                className={`text-[11px] uppercase tracking-[0.15em] px-3 py-1.5 border ${
+                  tab === 'computers'
+                    ? 'border-[#c9854a] text-[#c9854a]'
+                    : 'border-white/10 text-[#5c564e]'
+                }`}
+              >
+                Computers
+              </button>
             </div>
 
-            <div className="space-y-3">
-              {computers.map((c) => (
-                <div
-                  key={c.id}
-                  className="border border-white/8 bg-[#161310]/50 p-4 flex flex-col gap-2"
-                >
-                  <div className="flex items-start justify-between gap-3">
-                    <div>
-                      <p className="text-sm text-[#f3ece3]">{c.name}</p>
-                      <p className="text-[11px] text-[#5c564e] mt-0.5">{c.role}</p>
-                      <p className="text-[11px] text-[#8a7f72] mt-1">{c.host}</p>
+            {tab === 'agents' && (
+              <>
+                <div>
+                  <p className="text-[10px] uppercase tracking-[0.25em] text-[#8a7f72] mb-3">Agents</p>
+                  <h2 className="font-display text-2xl font-light text-[#f3ece3]">Parallel workers</h2>
+                  <p className="mt-2 text-sm text-[#8a7f72]">
+                    Multiple agents on sub-problems · transparent reasoning · merged answer
+                  </p>
+                </div>
+
+                <div className="space-y-3">
+                  {agents.map((a) => (
+                    <div
+                      key={a.id}
+                      className="border border-white/8 bg-[#161310]/50 p-4 flex flex-col gap-2"
+                    >
+                      <div className="flex items-start justify-between gap-3">
+                        <div>
+                          <p className="text-sm text-[#f3ece3]">{a.name}</p>
+                          <p className="text-[11px] text-[#5c564e] mt-0.5">{a.mode}</p>
+                          <p className="text-[11px] text-[#8a7f72] mt-1 line-clamp-2">{a.focus}</p>
+                        </div>
+                        <span className={`text-[10px] uppercase tracking-wider ${AGENT_STATUS_COLOR[a.status]}`}>
+                          {a.status}
+                        </span>
+                      </div>
+                      <div className="flex flex-wrap gap-2 pt-2 border-t border-white/5">
+                        <button
+                          type="button"
+                          onClick={() => runAgent(a.id)}
+                          className="text-[10px] uppercase tracking-wider px-2 py-1 border border-[#c9854a]/40 text-[#c9854a] hover:bg-[#c9854a]/10"
+                        >
+                          Run
+                        </button>
+                        {(['running', 'idle', 'queued', 'error', 'offline'] as AgentStatus[]).map((s) => (
+                          <button
+                            key={s}
+                            type="button"
+                            onClick={() => setAgentStatus(a.id, s)}
+                            className={`text-[10px] uppercase tracking-wider px-2 py-1 border ${
+                              a.status === s
+                                ? 'border-[#c9854a] text-[#c9854a]'
+                                : 'border-white/10 text-[#5c564e] hover:text-[#8a7f72]'
+                            }`}
+                          >
+                            {s}
+                          </button>
+                        ))}
+                        <button
+                          type="button"
+                          onClick={() => removeAgent(a.id)}
+                          className="ml-auto text-[10px] uppercase tracking-wider text-[#5c564e] hover:text-red-400"
+                        >
+                          Remove
+                        </button>
+                      </div>
                     </div>
-                    <span className={`text-[10px] uppercase tracking-wider ${STATUS_COLOR[c.status]}`}>
-                      {c.status}
-                    </span>
-                  </div>
-                  <div className="flex flex-wrap gap-2 pt-2 border-t border-white/5">
-                    {(['online', 'idle', 'offline', 'maintenance'] as ComputerStatus[]).map((s) => (
+                  ))}
+                </div>
+
+                <div className="border border-white/10 bg-[#0c0b0a] p-5 space-y-3">
+                  <p className="text-[10px] uppercase tracking-[0.2em] text-[#c9854a]">Agent templates · one click</p>
+                  <div className="flex flex-wrap gap-2">
+                    {AGENT_TEMPLATES.map((tpl) => (
                       <button
-                        key={s}
+                        key={tpl.id}
                         type="button"
-                        onClick={() => setComputerStatus(c.id, s)}
-                        className={`text-[10px] uppercase tracking-wider px-2 py-1 border ${
-                          c.status === s
-                            ? 'border-[#c9854a] text-[#c9854a]'
-                            : 'border-white/10 text-[#5c564e] hover:text-[#8a7f72]'
-                        }`}
+                        disabled={adding}
+                        onClick={() => addFromAgentTemplate(tpl)}
+                        onContextMenu={(e) => {
+                          e.preventDefault();
+                          applyAgentTemplate(tpl);
+                        }}
+                        title="Click = add · Right-click = fill form"
+                        className="border border-white/10 px-3 py-1.5 text-[11px] text-[#8a7f72] hover:border-[#c9854a] hover:text-[#c9854a] transition-colors disabled:opacity-50"
                       >
-                        {s}
+                        {tpl.label}
                       </button>
                     ))}
-                    <button
-                      type="button"
-                      onClick={() => removeComputer(c.id)}
-                      className="ml-auto text-[10px] uppercase tracking-wider text-[#5c564e] hover:text-red-400"
+                  </div>
+                  <p className="text-[10px] text-[#5c564e]">Multi-agent · Search · Imagine · Code · Vision · Voice · Files · Deep reason</p>
+                </div>
+
+                <form onSubmit={addAgent} className="border border-white/10 bg-[#0c0b0a] p-5 space-y-3">
+                  <p className="text-[10px] uppercase tracking-[0.2em] text-[#c9854a]">Custom agent</p>
+                  <input
+                    value={agName}
+                    onChange={(e) => setAgName(e.target.value)}
+                    placeholder="Name *"
+                    required
+                    className="w-full border border-white/10 bg-[#161310] px-3 py-2 text-sm text-[#f3ece3] placeholder:text-[#5c564e] focus:border-[#c9854a] focus:outline-none"
+                  />
+                  <input
+                    value={agMode}
+                    onChange={(e) => setAgMode(e.target.value)}
+                    placeholder="Mode (parallel / search / imagine…)"
+                    className="w-full border border-white/10 bg-[#161310] px-3 py-2 text-sm text-[#f3ece3] placeholder:text-[#5c564e] focus:border-[#c9854a] focus:outline-none"
+                  />
+                  <input
+                    value={agFocus}
+                    onChange={(e) => setAgFocus(e.target.value)}
+                    placeholder="Focus"
+                    className="w-full border border-white/10 bg-[#161310] px-3 py-2 text-sm text-[#f3ece3] placeholder:text-[#5c564e] focus:border-[#c9854a] focus:outline-none"
+                  />
+                  <select
+                    value={agStatus}
+                    onChange={(e) => setAgStatus(e.target.value as AgentStatus)}
+                    className="w-full border border-white/10 bg-[#161310] px-3 py-2 text-sm text-[#f3ece3] focus:border-[#c9854a] focus:outline-none"
+                  >
+                    <option value="idle">idle</option>
+                    <option value="running">running</option>
+                    <option value="queued">queued</option>
+                    <option value="error">error</option>
+                    <option value="offline">offline</option>
+                  </select>
+                  <button
+                    type="submit"
+                    disabled={adding}
+                    className="w-full border border-[#c9854a] bg-[#c9854a] py-2.5 text-[11px] uppercase tracking-[0.18em] text-[#090807] hover:bg-transparent hover:text-[#c9854a] transition-colors disabled:opacity-50"
+                  >
+                    Add agent
+                  </button>
+                </form>
+              </>
+            )}
+
+            {tab === 'computers' && (
+              <>
+                <div>
+                  <p className="text-[10px] uppercase tracking-[0.25em] text-[#8a7f72] mb-3">Computers</p>
+                  <h2 className="font-display text-2xl font-light text-[#f3ece3]">Fleet</h2>
+                </div>
+
+                <div className="space-y-3">
+                  {computers.map((c) => (
+                    <div
+                      key={c.id}
+                      className="border border-white/8 bg-[#161310]/50 p-4 flex flex-col gap-2"
                     >
-                      Remove
-                    </button>
+                      <div className="flex items-start justify-between gap-3">
+                        <div>
+                          <p className="text-sm text-[#f3ece3]">{c.name}</p>
+                          <p className="text-[11px] text-[#5c564e] mt-0.5">{c.role}</p>
+                          <p className="text-[11px] text-[#8a7f72] mt-1">{c.host}</p>
+                        </div>
+                        <span className={`text-[10px] uppercase tracking-wider ${STATUS_COLOR[c.status]}`}>
+                          {c.status}
+                        </span>
+                      </div>
+                      <div className="flex flex-wrap gap-2 pt-2 border-t border-white/5">
+                        {(['online', 'idle', 'offline', 'maintenance'] as ComputerStatus[]).map((s) => (
+                          <button
+                            key={s}
+                            type="button"
+                            onClick={() => setComputerStatus(c.id, s)}
+                            className={`text-[10px] uppercase tracking-wider px-2 py-1 border ${
+                              c.status === s
+                                ? 'border-[#c9854a] text-[#c9854a]'
+                                : 'border-white/10 text-[#5c564e] hover:text-[#8a7f72]'
+                            }`}
+                          >
+                            {s}
+                          </button>
+                        ))}
+                        <button
+                          type="button"
+                          onClick={() => removeComputer(c.id)}
+                          className="ml-auto text-[10px] uppercase tracking-wider text-[#5c564e] hover:text-red-400"
+                        >
+                          Remove
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="border border-white/10 bg-[#0c0b0a] p-5 space-y-3">
+                  <p className="text-[10px] uppercase tracking-[0.2em] text-[#c9854a]">Computer templates</p>
+                  <div className="flex flex-wrap gap-2">
+                    {COMPUTER_TEMPLATES.map((tpl) => (
+                      <button
+                        key={tpl.id}
+                        type="button"
+                        disabled={adding}
+                        onClick={() => addFromComputerTemplate(tpl)}
+                        onContextMenu={(e) => {
+                          e.preventDefault();
+                          applyComputerTemplate(tpl);
+                        }}
+                        className="border border-white/10 px-3 py-1.5 text-[11px] text-[#8a7f72] hover:border-[#c9854a] hover:text-[#c9854a] transition-colors disabled:opacity-50"
+                      >
+                        {tpl.label}
+                      </button>
+                    ))}
                   </div>
                 </div>
-              ))}
-            </div>
 
-            {/* Templates — one-click add */}
-            <div className="border border-white/10 bg-[#0c0b0a] p-5 space-y-3">
-              <p className="text-[10px] uppercase tracking-[0.2em] text-[#c9854a]">Templates · one click</p>
-              <div className="flex flex-wrap gap-2">
-                {COMPUTER_TEMPLATES.map((tpl) => (
-                  <button
-                    key={tpl.id}
-                    type="button"
-                    disabled={adding}
-                    onClick={() => addFromTemplate(tpl)}
-                    onContextMenu={(e) => {
-                      e.preventDefault();
-                      applyComputerTemplate(tpl);
-                    }}
-                    title="Click = add · Right-click = fill form"
-                    className="border border-white/10 px-3 py-1.5 text-[11px] text-[#8a7f72] hover:border-[#c9854a] hover:text-[#c9854a] transition-colors disabled:opacity-50"
+                <form onSubmit={addComputer} className="border border-white/10 bg-[#0c0b0a] p-5 space-y-3">
+                  <p className="text-[10px] uppercase tracking-[0.2em] text-[#c9854a]">Custom computer</p>
+                  <input
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    placeholder="Name *"
+                    required
+                    className="w-full border border-white/10 bg-[#161310] px-3 py-2 text-sm text-[#f3ece3] placeholder:text-[#5c564e] focus:border-[#c9854a] focus:outline-none"
+                  />
+                  <input
+                    value={role}
+                    onChange={(e) => setRole(e.target.value)}
+                    placeholder="Role"
+                    className="w-full border border-white/10 bg-[#161310] px-3 py-2 text-sm text-[#f3ece3] placeholder:text-[#5c564e] focus:border-[#c9854a] focus:outline-none"
+                  />
+                  <input
+                    value={host}
+                    onChange={(e) => setHost(e.target.value)}
+                    placeholder="Host / specs"
+                    className="w-full border border-white/10 bg-[#161310] px-3 py-2 text-sm text-[#f3ece3] placeholder:text-[#5c564e] focus:border-[#c9854a] focus:outline-none"
+                  />
+                  <select
+                    value={status}
+                    onChange={(e) => setStatus(e.target.value as ComputerStatus)}
+                    className="w-full border border-white/10 bg-[#161310] px-3 py-2 text-sm text-[#f3ece3] focus:border-[#c9854a] focus:outline-none"
                   >
-                    {tpl.label}
+                    <option value="online">online</option>
+                    <option value="idle">idle</option>
+                    <option value="offline">offline</option>
+                    <option value="maintenance">maintenance</option>
+                  </select>
+                  <button
+                    type="submit"
+                    disabled={adding}
+                    className="w-full border border-[#c9854a] bg-[#c9854a] py-2.5 text-[11px] uppercase tracking-[0.18em] text-[#090807] hover:bg-transparent hover:text-[#c9854a] transition-colors disabled:opacity-50"
+                  >
+                    Add computer
                   </button>
-                ))}
-              </div>
-              <p className="text-[10px] text-[#5c564e]">Click adds instantly · Right-click fills the form below</p>
-            </div>
-
-            <form onSubmit={addComputer} className="border border-white/10 bg-[#0c0b0a] p-5 space-y-3">
-              <p className="text-[10px] uppercase tracking-[0.2em] text-[#c9854a]">Custom / edit then add</p>
-              <input
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                placeholder="Name *"
-                required
-                className="w-full border border-white/10 bg-[#161310] px-3 py-2 text-sm text-[#f3ece3] placeholder:text-[#5c564e] focus:border-[#c9854a] focus:outline-none"
-              />
-              <input
-                value={role}
-                onChange={(e) => setRole(e.target.value)}
-                placeholder="Role"
-                className="w-full border border-white/10 bg-[#161310] px-3 py-2 text-sm text-[#f3ece3] placeholder:text-[#5c564e] focus:border-[#c9854a] focus:outline-none"
-              />
-              <input
-                value={host}
-                onChange={(e) => setHost(e.target.value)}
-                placeholder="Host / specs"
-                className="w-full border border-white/10 bg-[#161310] px-3 py-2 text-sm text-[#f3ece3] placeholder:text-[#5c564e] focus:border-[#c9854a] focus:outline-none"
-              />
-              <select
-                value={status}
-                onChange={(e) => setStatus(e.target.value as ComputerStatus)}
-                className="w-full border border-white/10 bg-[#161310] px-3 py-2 text-sm text-[#f3ece3] focus:border-[#c9854a] focus:outline-none"
-              >
-                <option value="online">online</option>
-                <option value="idle">idle</option>
-                <option value="offline">offline</option>
-                <option value="maintenance">maintenance</option>
-              </select>
-              <input
-                value={notes}
-                onChange={(e) => setNotes(e.target.value)}
-                placeholder="Notes"
-                className="w-full border border-white/10 bg-[#161310] px-3 py-2 text-sm text-[#f3ece3] placeholder:text-[#5c564e] focus:border-[#c9854a] focus:outline-none"
-              />
-              <button
-                type="submit"
-                disabled={adding}
-                className="w-full border border-[#c9854a] bg-[#c9854a] py-2.5 text-[11px] uppercase tracking-[0.18em] text-[#090807] hover:bg-transparent hover:text-[#c9854a] transition-colors disabled:opacity-50"
-              >
-                {adding ? 'Adding…' : 'Add computer'}
-              </button>
-            </form>
+                </form>
+              </>
+            )}
           </section>
 
           <section className="lg:col-span-3 space-y-6">
@@ -496,7 +779,7 @@ export default function AdminPage() {
                 <h2 className="font-display text-2xl font-light text-[#f3ece3]">Activity</h2>
               </div>
               <div className="flex flex-wrap gap-2">
-                {(['all', 'deploy', 'inquiry', 'pathfinder', 'computer', 'system', 'manual'] as const).map(
+                {(['all', 'agent', 'deploy', 'inquiry', 'pathfinder', 'computer', 'system', 'manual'] as const).map(
                   (k) => (
                     <button
                       key={k}
@@ -515,9 +798,8 @@ export default function AdminPage() {
               </div>
             </div>
 
-            {/* Activity templates */}
             <div className="border border-white/10 bg-[#0c0b0a] p-4">
-              <p className="text-[10px] uppercase tracking-[0.2em] text-[#c9854a] mb-3">Templates · one click log</p>
+              <p className="text-[10px] uppercase tracking-[0.2em] text-[#c9854a] mb-3">Activity templates</p>
               <div className="flex flex-wrap gap-2">
                 {ACTIVITY_TEMPLATES.map((tpl) => (
                   <button
@@ -528,7 +810,6 @@ export default function AdminPage() {
                       e.preventDefault();
                       applyActivityTemplate(tpl);
                     }}
-                    title="Click = log now · Right-click = fill form"
                     className="border border-white/10 px-3 py-1.5 text-[11px] text-[#8a7f72] hover:border-[#c9854a] hover:text-[#c9854a] transition-colors"
                   >
                     {tpl.label}
@@ -571,7 +852,7 @@ export default function AdminPage() {
               />
             </form>
 
-            <div className="border border-white/8 divide-y divide-white/5 max-h-[520px] overflow-y-auto">
+            <div className="border border-white/8 divide-y divide-white/5 max-h-[560px] overflow-y-auto">
               {filtered.length === 0 && (
                 <p className="p-6 text-sm text-[#5c564e]">No activity in this filter.</p>
               )}
