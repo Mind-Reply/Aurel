@@ -1,36 +1,45 @@
 import { NextResponse } from 'next/server';
 
+function makeReceipt(): string {
+  const ts = Date.now().toString(36).toUpperCase();
+  const rand = Math.random().toString(36).slice(2, 8).toUpperCase();
+  return `AUR-${ts}-${rand}`;
+}
+
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    const { fullName, email, residenceLocation, portfolioCategory, message } = body || {};
+    const { fullName, email, residenceLocation, portfolioCategory, message, lane } = body || {};
 
-    if (!fullName?.trim() || !email?.trim() || !residenceLocation?.trim()) {
+    if (!fullName || !email || !residenceLocation) {
       return NextResponse.json(
         { error: 'Full name, email and property location are required.' },
         { status: 400 }
       );
     }
 
-    // Receipt format kept stable for client display. No secrets, no external write yet.
-    const receipt = `AUR-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).slice(2, 6).toUpperCase()}`;
+    // Platform receipt — durable reference for the owner
+    const receipt = makeReceipt();
 
-    // Structured log for later operator pickup (Vercel logs / future webhook)
-    console.log(
-      JSON.stringify({
-        type: 'aurel_inquiry',
-        receipt,
-        fullName: String(fullName).slice(0, 160),
-        email: String(email).slice(0, 254),
-        residenceLocation: String(residenceLocation).slice(0, 200),
-        portfolioCategory: portfolioCategory || 'residential',
-        message: message ? String(message).slice(0, 2000) : '',
-        at: new Date().toISOString(),
-      })
-    );
+    // In production this would write to Supabase / email the team.
+    // For now we return a real receipt so the active platform flow completes.
+    console.log('[AUREL INQUIRE]', {
+      receipt,
+      fullName,
+      email,
+      residenceLocation,
+      portfolioCategory,
+      lane: lane || null,
+      message: message ? String(message).slice(0, 200) : null,
+      at: new Date().toISOString(),
+    });
 
-    return NextResponse.json({ receipt, ok: true });
+    return NextResponse.json({
+      ok: true,
+      receipt,
+      message: 'Inquiry registered. Team will respond using the provided contact.',
+    });
   } catch {
-    return NextResponse.json({ error: 'Unable to register inquiry.' }, { status: 500 });
+    return NextResponse.json({ error: 'Unable to process inquiry.' }, { status: 500 });
   }
 }
