@@ -1,0 +1,46 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --bg: #090807;
+  --fg: #f3ece3;
+  --amber: #c9854a;
+  --stone: #161310;
+  --muted: #8a7f72;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--font-outfit), system-ui, sans-serif;
+}
+
+.font-display {
+  font-family: var(--font-cormorant), Georgia, serif;
+}
+
+.wordmark {
+  font-family: var(--font-cormorant), Georgia, serif;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  font-weight: 400;
+}
+
+.veil {
+  background: linear-gradient(to bottom, rgba(9, 8, 7, 0.2) 0%, rgba(9, 8, 7, 0.75) 60%, rgba(9, 8, 7, 0.95) 100%);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
