@@ -5,20 +5,23 @@ import Link from 'next/link';
 import {
   SEED_COMPUTERS,
   SEED_ACTIVITY,
+  COMPUTER_TEMPLATES,
+  ACTIVITY_TEMPLATES,
   KIND_LABEL,
   STATUS_COLOR,
   makeId,
   type Computer,
   type ComputerStatus,
+  type ComputerTemplate,
   type Activity,
   type ActivityKind,
+  type ActivityTemplate,
 } from '../../lib/admin';
 
 const STORAGE_PC = 'aurel-admin-computers';
 const STORAGE_ACT = 'aurel-admin-activity';
 const STORAGE_GATE = 'aurel-admin-unlocked';
 
-// Simple owner gate — change via env later if needed
 const OWNER_CODE = 'aurel-owner';
 
 function loadJSON<T>(key: string, fallback: T): T {
@@ -54,7 +57,6 @@ export default function AdminPage() {
   const [activities, setActivities] = useState<Activity[]>(SEED_ACTIVITY);
   const [filter, setFilter] = useState<ActivityKind | 'all'>('all');
 
-  // Quick-add form
   const [name, setName] = useState('');
   const [role, setRole] = useState('');
   const [host, setHost] = useState('');
@@ -63,9 +65,9 @@ export default function AdminPage() {
   const [adding, setAdding] = useState(false);
   const [msg, setMsg] = useState<string | null>(null);
 
-  // Manual activity
   const [actTitle, setActTitle] = useState('');
   const [actKind, setActKind] = useState<ActivityKind>('manual');
+  const [actDetail, setActDetail] = useState('');
 
   useEffect(() => {
     setUnlocked(localStorage.getItem(STORAGE_GATE) === '1');
@@ -100,6 +102,20 @@ export default function AdminPage() {
     setUnlocked(false);
   };
 
+  const applyComputerTemplate = (tpl: ComputerTemplate) => {
+    setName(tpl.name);
+    setRole(tpl.role);
+    setHost(tpl.host);
+    setStatus(tpl.status);
+    setNotes(tpl.notes || '');
+  };
+
+  const applyActivityTemplate = (tpl: ActivityTemplate) => {
+    setActKind(tpl.kind);
+    setActTitle(tpl.title);
+    setActDetail(tpl.detail || '');
+  };
+
   const addComputer = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim()) return;
@@ -129,7 +145,6 @@ export default function AdminPage() {
     };
     persistAct([activity, ...activities]);
 
-    // Soft server log
     try {
       await fetch('/api/admin/computers', {
         method: 'POST',
@@ -148,14 +163,50 @@ export default function AdminPage() {
     setTimeout(() => setMsg(null), 2000);
   };
 
-  const logActivity = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const addFromTemplate = async (tpl: ComputerTemplate) => {
+    setAdding(true);
+    const computer: Computer = {
+      id: makeId('pc'),
+      name: tpl.name,
+      role: tpl.role,
+      host: tpl.host,
+      status: tpl.status,
+      lastSeen: new Date().toISOString(),
+      notes: tpl.notes,
+    };
+    persistPc([computer, ...computers]);
+    persistAct([
+      {
+        id: makeId('act'),
+        kind: 'computer',
+        title: `Added ${computer.name}`,
+        detail: `Template · ${tpl.label}`,
+        computerId: computer.id,
+        at: new Date().toISOString(),
+      },
+      ...activities,
+    ]);
+    try {
+      await fetch('/api/admin/computers', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(computer),
+      });
+    } catch {}
+    setAdding(false);
+    setMsg(`${tpl.label} added`);
+    setTimeout(() => setMsg(null), 2000);
+  };
+
+  const logActivity = async (e?: React.FormEvent) => {
+    e?.preventDefault();
     if (!actTitle.trim()) return;
 
     const activity: Activity = {
       id: makeId('act'),
       kind: actKind,
       title: actTitle.trim(),
+      detail: actDetail.trim() || undefined,
       at: new Date().toISOString(),
     };
     persistAct([activity, ...activities]);
@@ -169,6 +220,27 @@ export default function AdminPage() {
     } catch {}
 
     setActTitle('');
+    setActDetail('');
+  };
+
+  const logFromTemplate = async (tpl: ActivityTemplate) => {
+    const activity: Activity = {
+      id: makeId('act'),
+      kind: tpl.kind,
+      title: tpl.title,
+      detail: tpl.detail,
+      at: new Date().toISOString(),
+    };
+    persistAct([activity, ...activities]);
+    try {
+      await fetch('/api/admin/activity', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(activity),
+      });
+    } catch {}
+    setMsg(`Logged · ${tpl.label}`);
+    setTimeout(() => setMsg(null), 1500);
   };
 
   const setComputerStatus = (id: string, next: ComputerStatus) => {
@@ -178,14 +250,16 @@ export default function AdminPage() {
     persistPc(list);
     const pc = list.find((c) => c.id === id);
     if (pc) {
-      const activity: Activity = {
-        id: makeId('act'),
-        kind: 'computer',
-        title: `${pc.name} → ${next}`,
-        computerId: id,
-        at: new Date().toISOString(),
-      };
-      persistAct([activity, ...activities]);
+      persistAct([
+        {
+          id: makeId('act'),
+          kind: 'computer',
+          title: `${pc.name} → ${next}`,
+          computerId: id,
+          at: new Date().toISOString(),
+        },
+        ...activities,
+      ]);
     }
   };
 
@@ -243,7 +317,6 @@ export default function AdminPage() {
 
   return (
     <div className="min-h-screen bg-[#090807] text-[#f3ece3]">
-      {/* Header */}
       <header className="border-b border-white/5 bg-[#0c0b0a]">
         <div className="mx-auto max-w-6xl px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-6">
@@ -268,7 +341,6 @@ export default function AdminPage() {
       </header>
 
       <main className="mx-auto max-w-6xl px-6 py-10 space-y-12">
-        {/* Pulse strip */}
         <section className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <div className="border border-white/8 bg-[#161310]/60 p-5">
             <p className="text-[10px] uppercase tracking-[0.2em] text-[#5c564e]">Computers</p>
@@ -297,7 +369,6 @@ export default function AdminPage() {
         )}
 
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-10">
-          {/* Computers + quick add */}
           <section className="lg:col-span-2 space-y-6">
             <div>
               <p className="text-[10px] uppercase tracking-[0.25em] text-[#8a7f72] mb-3">Computers</p>
@@ -347,9 +418,32 @@ export default function AdminPage() {
               ))}
             </div>
 
-            {/* Quick add */}
+            {/* Templates — one-click add */}
+            <div className="border border-white/10 bg-[#0c0b0a] p-5 space-y-3">
+              <p className="text-[10px] uppercase tracking-[0.2em] text-[#c9854a]">Templates · one click</p>
+              <div className="flex flex-wrap gap-2">
+                {COMPUTER_TEMPLATES.map((tpl) => (
+                  <button
+                    key={tpl.id}
+                    type="button"
+                    disabled={adding}
+                    onClick={() => addFromTemplate(tpl)}
+                    onContextMenu={(e) => {
+                      e.preventDefault();
+                      applyComputerTemplate(tpl);
+                    }}
+                    title="Click = add · Right-click = fill form"
+                    className="border border-white/10 px-3 py-1.5 text-[11px] text-[#8a7f72] hover:border-[#c9854a] hover:text-[#c9854a] transition-colors disabled:opacity-50"
+                  >
+                    {tpl.label}
+                  </button>
+                ))}
+              </div>
+              <p className="text-[10px] text-[#5c564e]">Click adds instantly · Right-click fills the form below</p>
+            </div>
+
             <form onSubmit={addComputer} className="border border-white/10 bg-[#0c0b0a] p-5 space-y-3">
-              <p className="text-[10px] uppercase tracking-[0.2em] text-[#c9854a]">Quick add computer</p>
+              <p className="text-[10px] uppercase tracking-[0.2em] text-[#c9854a]">Custom / edit then add</p>
               <input
                 value={name}
                 onChange={(e) => setName(e.target.value)}
@@ -360,7 +454,7 @@ export default function AdminPage() {
               <input
                 value={role}
                 onChange={(e) => setRole(e.target.value)}
-                placeholder="Role (e.g. Edge node)"
+                placeholder="Role"
                 className="w-full border border-white/10 bg-[#161310] px-3 py-2 text-sm text-[#f3ece3] placeholder:text-[#5c564e] focus:border-[#c9854a] focus:outline-none"
               />
               <input
@@ -382,7 +476,7 @@ export default function AdminPage() {
               <input
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
-                placeholder="Notes (optional)"
+                placeholder="Notes"
                 className="w-full border border-white/10 bg-[#161310] px-3 py-2 text-sm text-[#f3ece3] placeholder:text-[#5c564e] focus:border-[#c9854a] focus:outline-none"
               />
               <button
@@ -395,7 +489,6 @@ export default function AdminPage() {
             </form>
           </section>
 
-          {/* Activity monitor */}
           <section className="lg:col-span-3 space-y-6">
             <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
               <div>
@@ -422,31 +515,60 @@ export default function AdminPage() {
               </div>
             </div>
 
-            {/* Manual log */}
-            <form onSubmit={logActivity} className="flex flex-col sm:flex-row gap-2">
-              <select
-                value={actKind}
-                onChange={(e) => setActKind(e.target.value as ActivityKind)}
-                className="border border-white/10 bg-[#161310] px-3 py-2 text-sm text-[#f3ece3] focus:border-[#c9854a] focus:outline-none"
-              >
-                {(Object.keys(KIND_LABEL) as ActivityKind[]).map((k) => (
-                  <option key={k} value={k}>
-                    {KIND_LABEL[k]}
-                  </option>
+            {/* Activity templates */}
+            <div className="border border-white/10 bg-[#0c0b0a] p-4">
+              <p className="text-[10px] uppercase tracking-[0.2em] text-[#c9854a] mb-3">Templates · one click log</p>
+              <div className="flex flex-wrap gap-2">
+                {ACTIVITY_TEMPLATES.map((tpl) => (
+                  <button
+                    key={tpl.id}
+                    type="button"
+                    onClick={() => logFromTemplate(tpl)}
+                    onContextMenu={(e) => {
+                      e.preventDefault();
+                      applyActivityTemplate(tpl);
+                    }}
+                    title="Click = log now · Right-click = fill form"
+                    className="border border-white/10 px-3 py-1.5 text-[11px] text-[#8a7f72] hover:border-[#c9854a] hover:text-[#c9854a] transition-colors"
+                  >
+                    {tpl.label}
+                  </button>
                 ))}
-              </select>
+              </div>
+            </div>
+
+            <form onSubmit={logActivity} className="flex flex-col gap-2">
+              <div className="flex flex-col sm:flex-row gap-2">
+                <select
+                  value={actKind}
+                  onChange={(e) => setActKind(e.target.value as ActivityKind)}
+                  className="border border-white/10 bg-[#161310] px-3 py-2 text-sm text-[#f3ece3] focus:border-[#c9854a] focus:outline-none"
+                >
+                  {(Object.keys(KIND_LABEL) as ActivityKind[]).map((k) => (
+                    <option key={k} value={k}>
+                      {KIND_LABEL[k]}
+                    </option>
+                  ))}
+                </select>
+                <input
+                  value={actTitle}
+                  onChange={(e) => setActTitle(e.target.value)}
+                  placeholder="Title…"
+                  className="flex-1 border border-white/10 bg-[#161310] px-3 py-2 text-sm text-[#f3ece3] placeholder:text-[#5c564e] focus:border-[#c9854a] focus:outline-none"
+                />
+                <button
+                  type="submit"
+                  className="border border-white/20 px-4 py-2 text-[11px] uppercase tracking-[0.15em] text-[#f3ece3] hover:border-[#c9854a] hover:text-[#c9854a] transition-colors"
+                >
+                  Log
+                </button>
+              </div>
               <input
-                value={actTitle}
-                onChange={(e) => setActTitle(e.target.value)}
-                placeholder="Log activity…"
-                className="flex-1 border border-white/10 bg-[#161310] px-3 py-2 text-sm text-[#f3ece3] placeholder:text-[#5c564e] focus:border-[#c9854a] focus:outline-none"
+                value={actDetail}
+                onChange={(e) => setActDetail(e.target.value)}
+                placeholder="Detail (optional)"
+                className="border border-white/10 bg-[#161310] px-3 py-2 text-sm text-[#f3ece3] placeholder:text-[#5c564e] focus:border-[#c9854a] focus:outline-none"
               />
-              <button
-                type="submit"
-                className="border border-white/20 px-4 py-2 text-[11px] uppercase tracking-[0.15em] text-[#f3ece3] hover:border-[#c9854a] hover:text-[#c9854a] transition-colors"
-              >
-                Log
-              </button>
             </form>
 
             <div className="border border-white/8 divide-y divide-white/5 max-h-[520px] overflow-y-auto">

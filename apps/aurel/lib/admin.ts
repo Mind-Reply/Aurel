@@ -28,6 +28,159 @@ export type Activity = {
   at: string;
 };
 
+export type ComputerTemplate = {
+  id: string;
+  label: string;
+  name: string;
+  role: string;
+  host: string;
+  status: ComputerStatus;
+  notes?: string;
+};
+
+export type ActivityTemplate = {
+  id: string;
+  label: string;
+  kind: ActivityKind;
+  title: string;
+  detail?: string;
+};
+
+export const COMPUTER_TEMPLATES: ComputerTemplate[] = [
+  {
+    id: 'tpl-mega',
+    label: 'MegaAgent',
+    name: 'MegaAgent PC Studio',
+    role: 'Primary compute · local-first',
+    host: 'Threadripper 7970X · RTX PRO 6000 96GB',
+    status: 'online',
+    notes: 'Always-on owner node · privacy-first',
+  },
+  {
+    id: 'tpl-edge',
+    label: 'Vercel Edge',
+    name: 'Vercel Edge (aurel)',
+    role: 'Public surface',
+    host: 'aurel.a11-k.space',
+    status: 'online',
+    notes: 'House + System production',
+  },
+  {
+    id: 'tpl-laptop',
+    label: 'Owner laptop',
+    name: 'Owner Laptop',
+    role: 'Mobile control',
+    host: 'macOS / Windows',
+    status: 'idle',
+    notes: 'Day-to-day owner machine',
+  },
+  {
+    id: 'tpl-mac-mini',
+    label: 'Mac Mini',
+    name: 'Mac Mini Node',
+    role: 'Always-on light node',
+    host: 'Apple Silicon',
+    status: 'online',
+  },
+  {
+    id: 'tpl-gpu',
+    label: 'GPU node',
+    name: 'GPU Worker',
+    role: 'Inference / render',
+    host: 'CUDA workstation',
+    status: 'idle',
+    notes: 'Heavy jobs only',
+  },
+  {
+    id: 'tpl-pi',
+    label: 'Edge Pi',
+    name: 'Raspberry Pi Edge',
+    role: 'Site / IoT edge',
+    host: 'ARM · local network',
+    status: 'offline',
+  },
+  {
+    id: 'tpl-cloud',
+    label: 'Cloud VM',
+    name: 'Cloud VM',
+    role: 'Burst / staging',
+    host: 'GCP / AWS / Hetzner',
+    status: 'idle',
+  },
+];
+
+export const ACTIVITY_TEMPLATES: ActivityTemplate[] = [
+  {
+    id: 'act-deploy-prod',
+    label: 'Deploy prod',
+    kind: 'deploy',
+    title: 'Production deploy ready',
+    detail: 'Vercel production · main',
+  },
+  {
+    id: 'act-deploy-preview',
+    label: 'Deploy preview',
+    kind: 'deploy',
+    title: 'Preview deploy',
+    detail: 'Branch preview live',
+  },
+  {
+    id: 'act-inquiry',
+    label: 'Inquiry in',
+    kind: 'inquiry',
+    title: 'Private inquiry received',
+    detail: 'Receipt issued',
+  },
+  {
+    id: 'act-pathfinder',
+    label: 'Pathfinder',
+    kind: 'pathfinder',
+    title: 'Pathfinder recommendation used',
+    detail: 'Lane prefilled into inquiry',
+  },
+  {
+    id: 'act-scent',
+    label: 'Scent hold',
+    kind: 'scent',
+    title: 'Scent formula held',
+    detail: 'Atelier localStorage',
+  },
+  {
+    id: 'act-blueprint',
+    label: 'Blueprint',
+    kind: 'system',
+    title: 'Private Blueprint commissioned',
+    detail: '10-day delivery clock started',
+  },
+  {
+    id: 'act-assess',
+    label: 'Assessment',
+    kind: 'system',
+    title: 'Assessment request',
+    detail: '48h response SLA',
+  },
+  {
+    id: 'act-maint',
+    label: 'Maintenance',
+    kind: 'computer',
+    title: 'Node entered maintenance',
+    detail: 'Scheduled window',
+  },
+  {
+    id: 'act-online',
+    label: 'Node online',
+    kind: 'computer',
+    title: 'Node back online',
+  },
+  {
+    id: 'act-manual',
+    label: 'Note',
+    kind: 'manual',
+    title: 'Owner note',
+    detail: '',
+  },
+];
+
 export const SEED_COMPUTERS: Computer[] = [
   {
     id: 'mega-agent',
