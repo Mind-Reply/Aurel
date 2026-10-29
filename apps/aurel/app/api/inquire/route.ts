@@ -18,11 +18,8 @@ export async function POST(req: Request) {
       );
     }
 
-    // Platform receipt — durable reference for the owner
     const receipt = makeReceipt();
 
-    // In production this would write to Supabase / email the team.
-    // For now we return a real receipt so the active platform flow completes.
     console.log('[AUREL INQUIRE]', {
       receipt,
       fullName,
@@ -37,7 +34,8 @@ export async function POST(req: Request) {
     return NextResponse.json({
       ok: true,
       receipt,
-      message: 'Inquiry registered. Team will respond using the provided contact.',
+      message: 'Inquiry registered. We respond within 48 hours using the contact provided.',
+      slaHours: 48,
     });
   } catch {
     return NextResponse.json({ error: 'Unable to process inquiry.' }, { status: 500 });

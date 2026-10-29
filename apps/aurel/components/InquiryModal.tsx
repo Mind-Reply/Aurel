@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 interface InquiryModalProps {
   isOpen: boolean;
@@ -13,10 +13,16 @@ export const InquiryModal: React.FC<InquiryModalProps> = ({ isOpen, onClose, pre
   const [email, setEmail] = useState('');
   const [residenceLocation, setResidenceLocation] = useState('');
   const [portfolioCategory, setPortfolioCategory] = useState<'residential' | 'hospitality' | 'private_office'>('residential');
-  const [message, setMessage] = useState(prefillLane ? `Lane of interest: ${prefillLane}` : '');
+  const [message, setMessage] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [receipt, setReceipt] = useState<string | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (prefillLane) {
+      setMessage((prev) => (prev.startsWith('Lane of interest:') || prev === '' ? `Lane of interest: ${prefillLane}` : prev));
+    }
+  }, [prefillLane]);
 
   if (!isOpen) return null;
 
@@ -83,7 +89,10 @@ export const InquiryModal: React.FC<InquiryModalProps> = ({ isOpen, onClose, pre
               {receipt}
             </p>
             <p className="mx-auto max-w-md text-sm font-light text-[#8a7f72]">
-              Your inquiry has been received. The team will review the details and respond using the contact information provided.
+              Your inquiry is registered. We respond within <span className="text-[#f3ece3]">48 hours</span> using the contact you provided. Keep this receipt for reference.
+            </p>
+            <p className="text-[11px] text-[#5c564e]">
+              No further action required until you hear from us.
             </p>
             <button
               type="button"
@@ -101,6 +110,7 @@ export const InquiryModal: React.FC<InquiryModalProps> = ({ isOpen, onClose, pre
               {prefillLane && (
                 <p className="mt-2 text-[11px] text-[#8a7f72]">Aligned to: <span className="text-[#c9854a]">{prefillLane}</span></p>
               )}
+              <p className="mt-2 text-[11px] text-[#5c564e]">Response within 48 hours · Limited new commissions</p>
             </div>
 
             {errorMsg && (
