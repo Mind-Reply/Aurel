@@ -31,13 +31,13 @@ export default function HousePage() {
       <section className="relative min-h-[85vh] flex items-end md:items-center px-6 pb-20 pt-24 md:px-8">
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_30%_20%,#1a1510_0%,#090807_55%)]" />
         <div className="relative mx-auto max-w-6xl w-full">
-          <p className="mb-4 text-[10px] uppercase tracking-[0.3em] text-[#c9854a]">The House</p>
+          <p className="mb-4 text-[10px] uppercase tracking-[0.3em] text-[#c9854a]">The House · Active Platform</p>
           <h1 className="font-display text-5xl md:text-7xl font-light leading-[1.05] tracking-tight text-[#f3ece3] max-w-3xl text-balance">
             Scent. Metal.<br />
             <span className="italic text-[#c9854a]">System.</span>
           </h1>
           <p className="mt-8 max-w-xl text-base md:text-lg font-light leading-relaxed text-[#8a7f72]">
-            Three doors into one house. Atmosphere first. Connectivity that never announces itself.
+            Three doors into one house. Atmosphere first. Connectivity that never announces itself. Pathfinder, atelier, and private inquiry live.
           </p>
           <div className="mt-12 flex flex-wrap gap-4">
             <Link
@@ -51,6 +51,12 @@ export default function HousePage() {
               className="border border-white/20 px-7 py-3.5 text-[11px] uppercase tracking-[0.2em] text-[#f3ece3] transition-colors duration-200 hover:border-[#c9854a] hover:text-[#c9854a]"
             >
               Compose Scent
+            </Link>
+            <Link
+              href="/system#pathfinder"
+              className="border border-white/10 px-7 py-3.5 text-[11px] uppercase tracking-[0.2em] text-[#8a7f72] transition-colors duration-200 hover:border-white/30 hover:text-[#f3ece3]"
+            >
+              Pathfinder
             </Link>
           </div>
         </div>
@@ -82,8 +88,29 @@ export default function HousePage() {
         </div>
       </section>
 
+      {/* Platform strip */}
+      <section className="border-t border-white/5 px-6 py-16 md:px-8 bg-[#0c0b0a]">
+        <div className="mx-auto max-w-6xl grid grid-cols-1 sm:grid-cols-3 gap-10 text-center sm:text-left">
+          <div>
+            <p className="text-[10px] uppercase tracking-[0.2em] text-[#c9854a] mb-2">Atelier</p>
+            <p className="font-display text-xl text-[#f3ece3]">Compose & hold</p>
+            <p className="mt-1 text-sm text-[#8a7f72]">Accords stay in browser storage until you clear them.</p>
+          </div>
+          <div>
+            <p className="text-[10px] uppercase tracking-[0.2em] text-[#c9854a] mb-2">Pathfinder</p>
+            <p className="font-display text-xl text-[#f3ece3]">Lane recommendation</p>
+            <p className="mt-1 text-sm text-[#8a7f72]">Seat · need · scale → concrete product + inquiry.</p>
+          </div>
+          <div>
+            <p className="text-[10px] uppercase tracking-[0.2em] text-[#c9854a] mb-2">Inquiry</p>
+            <p className="font-display text-xl text-[#f3ece3]">Private commission</p>
+            <p className="mt-1 text-sm text-[#8a7f72]">Receipt returned instantly. Team reviews from logs.</p>
+          </div>
+        </div>
+      </section>
+
       {/* Manifesto */}
-      <section className="border-t border-white/5 px-6 py-24 md:px-8 bg-[#0c0b0a]">
+      <section className="border-t border-white/5 px-6 py-24 md:px-8">
         <div className="mx-auto max-w-3xl text-center">
           <p className="text-[10px] uppercase tracking-[0.3em] text-[#c9854a] mb-6">Manifesto</p>
           <p className="font-display text-2xl md:text-3xl font-light leading-snug text-[#f3ece3] text-balance">
@@ -93,6 +120,12 @@ export default function HousePage() {
           <p className="mt-8 text-sm font-light leading-relaxed text-[#8a7f72] max-w-xl mx-auto">
             Every room, every device, every moment — calm, stable, seamless. Connectivity engineered so the architecture remains the hero.
           </p>
+          <Link
+            href="/system"
+            className="mt-10 inline-block border border-[#c9854a] px-8 py-3.5 text-[11px] uppercase tracking-[0.2em] text-[#c9854a] transition-colors duration-200 hover:bg-[#c9854a] hover:text-[#090807]"
+          >
+            Open System
+          </Link>
         </div>
       </section>
     </Shell>
