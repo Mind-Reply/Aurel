@@ -1,0 +1,476 @@
+'use client';
+
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import Link from 'next/link';
+import {
+  SEED_COMPUTERS,
+  SEED_ACTIVITY,
+  KIND_LABEL,
+  STATUS_COLOR,
+  makeId,
+  type Computer,
+  type ComputerStatus,
+  type Activity,
+  type ActivityKind,
+} from '../../lib/admin';
+
+const STORAGE_PC = 'aurel-admin-computers';
+const STORAGE_ACT = 'aurel-admin-activity';
+const STORAGE_GATE = 'aurel-admin-unlocked';
+
+// Simple owner gate — change via env later if needed
+const OWNER_CODE = 'aurel-owner';
+
+function loadJSON<T>(key: string, fallback: T): T {
+  try {
+    const raw = localStorage.getItem(key);
+    if (!raw) return fallback;
+    return JSON.parse(raw) as T;
+  } catch {
+    return fallback;
+  }
+}
+
+function saveJSON(key: string, value: unknown) {
+  try {
+    localStorage.setItem(key, JSON.stringify(value));
+  } catch {}
+}
+
+function relativeTime(iso: string): string {
+  const diff = Date.now() - new Date(iso).getTime();
+  const m = Math.floor(diff / 60000);
+  if (m < 1) return 'just now';
+  if (m < 60) return `${m}m ago`;
+  const h = Math.floor(m / 60);
+  if (h < 24) return `${h}h ago`;
+  return `${Math.floor(h / 24)}d ago`;
+}
+
+export default function AdminPage() {
+  const [unlocked, setUnlocked] = useState(false);
+  const [code, setCode] = useState('');
+  const [computers, setComputers] = useState<Computer[]>(SEED_COMPUTERS);
+  const [activities, setActivities] = useState<Activity[]>(SEED_ACTIVITY);
+  const [filter, setFilter] = useState<ActivityKind | 'all'>('all');
+
+  // Quick-add form
+  const [name, setName] = useState('');
+  const [role, setRole] = useState('');
+  const [host, setHost] = useState('');
+  const [status, setStatus] = useState<ComputerStatus>('idle');
+  const [notes, setNotes] = useState('');
+  const [adding, setAdding] = useState(false);
+  const [msg, setMsg] = useState<string | null>(null);
+
+  // Manual activity
+  const [actTitle, setActTitle] = useState('');
+  const [actKind, setActKind] = useState<ActivityKind>('manual');
+
+  useEffect(() => {
+    setUnlocked(localStorage.getItem(STORAGE_GATE) === '1');
+    setComputers(loadJSON(STORAGE_PC, SEED_COMPUTERS));
+    setActivities(loadJSON(STORAGE_ACT, SEED_ACTIVITY));
+  }, []);
+
+  const persistPc = useCallback((list: Computer[]) => {
+    setComputers(list);
+    saveJSON(STORAGE_PC, list);
+  }, []);
+
+  const persistAct = useCallback((list: Activity[]) => {
+    setActivities(list);
+    saveJSON(STORAGE_ACT, list);
+  }, []);
+
+  const unlock = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (code.trim() === OWNER_CODE) {
+      localStorage.setItem(STORAGE_GATE, '1');
+      setUnlocked(true);
+      setCode('');
+    } else {
+      setMsg('Invalid code');
+      setTimeout(() => setMsg(null), 2000);
+    }
+  };
+
+  const lock = () => {
+    localStorage.removeItem(STORAGE_GATE);
+    setUnlocked(false);
+  };
+
+  const addComputer = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!name.trim()) return;
+    setAdding(true);
+    setMsg(null);
+
+    const computer: Computer = {
+      id: makeId('pc'),
+      name: name.trim(),
+      role: role.trim() || 'Node',
+      host: host.trim() || '—',
+      status,
+      lastSeen: new Date().toISOString(),
+      notes: notes.trim() || undefined,
+    };
+
+    const next = [computer, ...computers];
+    persistPc(next);
+
+    const activity: Activity = {
+      id: makeId('act'),
+      kind: 'computer',
+      title: `Added ${computer.name}`,
+      detail: computer.role,
+      computerId: computer.id,
+      at: new Date().toISOString(),
+    };
+    persistAct([activity, ...activities]);
+
+    // Soft server log
+    try {
+      await fetch('/api/admin/computers', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(computer),
+      });
+    } catch {}
+
+    setName('');
+    setRole('');
+    setHost('');
+    setNotes('');
+    setStatus('idle');
+    setAdding(false);
+    setMsg('Computer added');
+    setTimeout(() => setMsg(null), 2000);
+  };
+
+  const logActivity = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!actTitle.trim()) return;
+
+    const activity: Activity = {
+      id: makeId('act'),
+      kind: actKind,
+      title: actTitle.trim(),
+      at: new Date().toISOString(),
+    };
+    persistAct([activity, ...activities]);
+
+    try {
+      await fetch('/api/admin/activity', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(activity),
+      });
+    } catch {}
+
+    setActTitle('');
+  };
+
+  const setComputerStatus = (id: string, next: ComputerStatus) => {
+    const list = computers.map((c) =>
+      c.id === id ? { ...c, status: next, lastSeen: new Date().toISOString() } : c
+    );
+    persistPc(list);
+    const pc = list.find((c) => c.id === id);
+    if (pc) {
+      const activity: Activity = {
+        id: makeId('act'),
+        kind: 'computer',
+        title: `${pc.name} → ${next}`,
+        computerId: id,
+        at: new Date().toISOString(),
+      };
+      persistAct([activity, ...activities]);
+    }
+  };
+
+  const removeComputer = (id: string) => {
+    const pc = computers.find((c) => c.id === id);
+    persistPc(computers.filter((c) => c.id !== id));
+    if (pc) {
+      persistAct([
+        {
+          id: makeId('act'),
+          kind: 'computer',
+          title: `Removed ${pc.name}`,
+          at: new Date().toISOString(),
+        },
+        ...activities,
+      ]);
+    }
+  };
+
+  const filtered = useMemo(() => {
+    if (filter === 'all') return activities;
+    return activities.filter((a) => a.kind === filter);
+  }, [activities, filter]);
+
+  const onlineCount = computers.filter((c) => c.status === 'online').length;
+
+  if (!unlocked) {
+    return (
+      <div className="min-h-screen bg-[#090807] flex items-center justify-center px-6">
+        <form onSubmit={unlock} className="w-full max-w-sm border border-white/10 bg-[#161310] p-8">
+          <p className="text-[10px] uppercase tracking-[0.25em] text-[#c9854a] mb-2">Owner Admin</p>
+          <h1 className="font-display text-2xl font-light text-[#f3ece3] mb-6">Unlock dashboard</h1>
+          <input
+            type="password"
+            value={code}
+            onChange={(e) => setCode(e.target.value)}
+            placeholder="Owner code"
+            className="w-full border border-white/10 bg-[#0c0b0a] px-4 py-3 text-sm text-[#f3ece3] placeholder:text-[#5c564e] focus:border-[#c9854a] focus:outline-none mb-4"
+            autoFocus
+          />
+          {msg && <p className="text-xs text-red-400 mb-3">{msg}</p>}
+          <button
+            type="submit"
+            className="w-full border border-[#c9854a] bg-[#c9854a] py-3 text-[11px] uppercase tracking-[0.2em] text-[#090807] hover:bg-transparent hover:text-[#c9854a] transition-colors"
+          >
+            Enter
+          </button>
+          <Link href="/" className="mt-6 block text-center text-[11px] text-[#5c564e] hover:text-[#8a7f72]">
+            ← House
+          </Link>
+        </form>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-[#090807] text-[#f3ece3]">
+      {/* Header */}
+      <header className="border-b border-white/5 bg-[#0c0b0a]">
+        <div className="mx-auto max-w-6xl px-6 py-4 flex items-center justify-between">
+          <div className="flex items-center gap-6">
+            <Link href="/" className="text-sm tracking-wide text-[#f3ece3] hover:text-[#c9854a]">
+              AUREL
+            </Link>
+            <span className="text-[10px] uppercase tracking-[0.2em] text-[#c9854a]">Admin</span>
+          </div>
+          <div className="flex items-center gap-4">
+            <span className="text-[11px] text-[#8a7f72]">
+              {onlineCount}/{computers.length} online
+            </span>
+            <button
+              type="button"
+              onClick={lock}
+              className="text-[11px] uppercase tracking-[0.15em] text-[#5c564e] hover:text-[#8a7f72]"
+            >
+              Lock
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <main className="mx-auto max-w-6xl px-6 py-10 space-y-12">
+        {/* Pulse strip */}
+        <section className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div className="border border-white/8 bg-[#161310]/60 p-5">
+            <p className="text-[10px] uppercase tracking-[0.2em] text-[#5c564e]">Computers</p>
+            <p className="font-display text-3xl text-[#f3ece3] mt-1">{computers.length}</p>
+          </div>
+          <div className="border border-white/8 bg-[#161310]/60 p-5">
+            <p className="text-[10px] uppercase tracking-[0.2em] text-[#5c564e]">Online</p>
+            <p className="font-display text-3xl text-emerald-400 mt-1">{onlineCount}</p>
+          </div>
+          <div className="border border-white/8 bg-[#161310]/60 p-5">
+            <p className="text-[10px] uppercase tracking-[0.2em] text-[#5c564e]">Activities</p>
+            <p className="font-display text-3xl text-[#f3ece3] mt-1">{activities.length}</p>
+          </div>
+          <div className="border border-white/8 bg-[#161310]/60 p-5">
+            <p className="text-[10px] uppercase tracking-[0.2em] text-[#5c564e]">Last event</p>
+            <p className="font-display text-xl text-[#c9854a] mt-2">
+              {activities[0] ? relativeTime(activities[0].at) : '—'}
+            </p>
+          </div>
+        </section>
+
+        {msg && (
+          <p className="text-sm text-[#c9854a] border border-[#c9854a]/30 bg-[#c9854a]/5 px-4 py-2">
+            {msg}
+          </p>
+        )}
+
+        <div className="grid grid-cols-1 lg:grid-cols-5 gap-10">
+          {/* Computers + quick add */}
+          <section className="lg:col-span-2 space-y-6">
+            <div>
+              <p className="text-[10px] uppercase tracking-[0.25em] text-[#8a7f72] mb-3">Computers</p>
+              <h2 className="font-display text-2xl font-light text-[#f3ece3]">Fleet</h2>
+            </div>
+
+            <div className="space-y-3">
+              {computers.map((c) => (
+                <div
+                  key={c.id}
+                  className="border border-white/8 bg-[#161310]/50 p-4 flex flex-col gap-2"
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <p className="text-sm text-[#f3ece3]">{c.name}</p>
+                      <p className="text-[11px] text-[#5c564e] mt-0.5">{c.role}</p>
+                      <p className="text-[11px] text-[#8a7f72] mt-1">{c.host}</p>
+                    </div>
+                    <span className={`text-[10px] uppercase tracking-wider ${STATUS_COLOR[c.status]}`}>
+                      {c.status}
+                    </span>
+                  </div>
+                  <div className="flex flex-wrap gap-2 pt-2 border-t border-white/5">
+                    {(['online', 'idle', 'offline', 'maintenance'] as ComputerStatus[]).map((s) => (
+                      <button
+                        key={s}
+                        type="button"
+                        onClick={() => setComputerStatus(c.id, s)}
+                        className={`text-[10px] uppercase tracking-wider px-2 py-1 border ${
+                          c.status === s
+                            ? 'border-[#c9854a] text-[#c9854a]'
+                            : 'border-white/10 text-[#5c564e] hover:text-[#8a7f72]'
+                        }`}
+                      >
+                        {s}
+                      </button>
+                    ))}
+                    <button
+                      type="button"
+                      onClick={() => removeComputer(c.id)}
+                      className="ml-auto text-[10px] uppercase tracking-wider text-[#5c564e] hover:text-red-400"
+                    >
+                      Remove
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Quick add */}
+            <form onSubmit={addComputer} className="border border-white/10 bg-[#0c0b0a] p-5 space-y-3">
+              <p className="text-[10px] uppercase tracking-[0.2em] text-[#c9854a]">Quick add computer</p>
+              <input
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="Name *"
+                required
+                className="w-full border border-white/10 bg-[#161310] px-3 py-2 text-sm text-[#f3ece3] placeholder:text-[#5c564e] focus:border-[#c9854a] focus:outline-none"
+              />
+              <input
+                value={role}
+                onChange={(e) => setRole(e.target.value)}
+                placeholder="Role (e.g. Edge node)"
+                className="w-full border border-white/10 bg-[#161310] px-3 py-2 text-sm text-[#f3ece3] placeholder:text-[#5c564e] focus:border-[#c9854a] focus:outline-none"
+              />
+              <input
+                value={host}
+                onChange={(e) => setHost(e.target.value)}
+                placeholder="Host / specs"
+                className="w-full border border-white/10 bg-[#161310] px-3 py-2 text-sm text-[#f3ece3] placeholder:text-[#5c564e] focus:border-[#c9854a] focus:outline-none"
+              />
+              <select
+                value={status}
+                onChange={(e) => setStatus(e.target.value as ComputerStatus)}
+                className="w-full border border-white/10 bg-[#161310] px-3 py-2 text-sm text-[#f3ece3] focus:border-[#c9854a] focus:outline-none"
+              >
+                <option value="online">online</option>
+                <option value="idle">idle</option>
+                <option value="offline">offline</option>
+                <option value="maintenance">maintenance</option>
+              </select>
+              <input
+                value={notes}
+                onChange={(e) => setNotes(e.target.value)}
+                placeholder="Notes (optional)"
+                className="w-full border border-white/10 bg-[#161310] px-3 py-2 text-sm text-[#f3ece3] placeholder:text-[#5c564e] focus:border-[#c9854a] focus:outline-none"
+              />
+              <button
+                type="submit"
+                disabled={adding}
+                className="w-full border border-[#c9854a] bg-[#c9854a] py-2.5 text-[11px] uppercase tracking-[0.18em] text-[#090807] hover:bg-transparent hover:text-[#c9854a] transition-colors disabled:opacity-50"
+              >
+                {adding ? 'Adding…' : 'Add computer'}
+              </button>
+            </form>
+          </section>
+
+          {/* Activity monitor */}
+          <section className="lg:col-span-3 space-y-6">
+            <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
+              <div>
+                <p className="text-[10px] uppercase tracking-[0.25em] text-[#8a7f72] mb-3">Automation</p>
+                <h2 className="font-display text-2xl font-light text-[#f3ece3]">Activity</h2>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {(['all', 'deploy', 'inquiry', 'pathfinder', 'computer', 'system', 'manual'] as const).map(
+                  (k) => (
+                    <button
+                      key={k}
+                      type="button"
+                      onClick={() => setFilter(k)}
+                      className={`text-[10px] uppercase tracking-wider px-2.5 py-1 border ${
+                        filter === k
+                          ? 'border-[#c9854a] text-[#c9854a]'
+                          : 'border-white/10 text-[#5c564e] hover:text-[#8a7f72]'
+                      }`}
+                    >
+                      {k}
+                    </button>
+                  )
+                )}
+              </div>
+            </div>
+
+            {/* Manual log */}
+            <form onSubmit={logActivity} className="flex flex-col sm:flex-row gap-2">
+              <select
+                value={actKind}
+                onChange={(e) => setActKind(e.target.value as ActivityKind)}
+                className="border border-white/10 bg-[#161310] px-3 py-2 text-sm text-[#f3ece3] focus:border-[#c9854a] focus:outline-none"
+              >
+                {(Object.keys(KIND_LABEL) as ActivityKind[]).map((k) => (
+                  <option key={k} value={k}>
+                    {KIND_LABEL[k]}
+                  </option>
+                ))}
+              </select>
+              <input
+                value={actTitle}
+                onChange={(e) => setActTitle(e.target.value)}
+                placeholder="Log activity…"
+                className="flex-1 border border-white/10 bg-[#161310] px-3 py-2 text-sm text-[#f3ece3] placeholder:text-[#5c564e] focus:border-[#c9854a] focus:outline-none"
+              />
+              <button
+                type="submit"
+                className="border border-white/20 px-4 py-2 text-[11px] uppercase tracking-[0.15em] text-[#f3ece3] hover:border-[#c9854a] hover:text-[#c9854a] transition-colors"
+              >
+                Log
+              </button>
+            </form>
+
+            <div className="border border-white/8 divide-y divide-white/5 max-h-[520px] overflow-y-auto">
+              {filtered.length === 0 && (
+                <p className="p-6 text-sm text-[#5c564e]">No activity in this filter.</p>
+              )}
+              {filtered.map((a) => (
+                <div key={a.id} className="px-4 py-3 flex items-start gap-4 hover:bg-white/[0.02]">
+                  <div className="shrink-0 w-20">
+                    <span className="text-[10px] uppercase tracking-wider text-[#c9854a]">
+                      {KIND_LABEL[a.kind]}
+                    </span>
+                    <p className="text-[10px] text-[#5c564e] mt-0.5">{relativeTime(a.at)}</p>
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-sm text-[#f3ece3]">{a.title}</p>
+                    {a.detail && <p className="text-[11px] text-[#8a7f72] mt-0.5">{a.detail}</p>}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </section>
+        </div>
+      </main>
+    </div>
+  );
+}
